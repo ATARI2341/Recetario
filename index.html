@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recetario Definitivo - Colores | Banderas | Edición Completa</title>
+    <title>Recetario Definitivo - Múltiples categorías + Buscador</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -61,7 +61,7 @@
             flex-wrap: wrap;
             gap: 10px;
             margin-bottom: 15px;
-            max-height: 200px;
+            max-height: 250px;
             overflow-y: auto;
         }
 
@@ -75,15 +75,25 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            position: relative;
+        }
+
+        .color-picker-group {
+            display: inline-flex;
+            gap: 5px;
+            margin-left: 8px;
         }
 
         .color-picker-btn {
+            width: 25px;
+            height: 25px;
+            border: none;
+            border-radius: 50%;
             cursor: pointer;
-            font-size: 12px;
-            padding: 2px 5px;
-            border-radius: 10px;
-            background: rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .color-picker-btn:hover {
+            transform: scale(1.1);
         }
 
         /* Editor */
@@ -122,6 +132,39 @@
             border: 2px solid #e0e0e0;
             border-radius: 10px;
             font-size: 14px;
+        }
+
+        /* Multi-select personalizado */
+        .multi-select {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+            background: white;
+        }
+
+        .multi-select-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .multi-select-option:hover {
+            background: #f0f0f0;
+        }
+
+        .multi-select-option input {
+            width: auto;
+            margin: 0;
+        }
+
+        .multi-select-option.selected {
+            background: #e3f2fd;
         }
 
         /* Editor toolbar */
@@ -198,6 +241,33 @@
             color: white;
         }
 
+        /* Buscador */
+        .buscador {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .buscador-input {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .buscador-input input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+        }
+
+        .buscador-input button {
+            padding: 12px 25px;
+        }
+
         /* Filtros */
         .filtros {
             background: white;
@@ -228,6 +298,19 @@
             border-color: #667eea;
         }
 
+        .filtro-tipo-item, .filtro-pais-item {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filtro-tipo-item.active, .filtro-pais-item.active {
+            border: 2px solid #333;
+            transform: scale(1.05);
+        }
+
         /* Grid de recetas */
         .recetas-grid {
             display: grid;
@@ -236,7 +319,7 @@
             margin-top: 30px;
         }
 
-        /* Tarjeta con color dinámico */
+        /* Tarjeta */
         .tarjeta {
             border-radius: 20px;
             overflow: hidden;
@@ -280,7 +363,7 @@
         .badge-categoria {
             padding: 4px 12px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             display: inline-flex;
             align-items: center;
@@ -380,10 +463,6 @@
             height: 3px;
         }
 
-        .flag-icon {
-            font-size: 1.2em;
-        }
-
         @media (max-width: 768px) {
             .form-grid {
                 grid-template-columns: 1fr;
@@ -398,11 +477,11 @@
     <div class="container">
         <div class="header">
             <h1><i class="fas fa-utensils"></i> Recetario Definitivo</h1>
-            <p>Colores personalizables | Banderas | Edición completa de texto e imagen</p>
+            <p>Múltiples categorías por receta | Buscador | Colores personalizables</p>
 
             <div class="categorias-panel">
                 <div class="categoria-box">
-                    <h3><i class="fas fa-palette"></i> Tipos de comida (elige color)</h3>
+                    <h3><i class="fas fa-palette"></i> Tipos de comida</h3>
                     <div class="categoria-items" id="tiposContainer"></div>
                     <div class="nueva-categoria">
                         <input type="text" id="nuevoTipo" placeholder="Nuevo tipo (ej: Vegano)">
@@ -431,12 +510,12 @@
                         <input type="text" id="urlVideo" placeholder="https://facebook.com/video/...">
                     </div>
                     <div class="form-group">
-                        <label><i class="fas fa-tag"></i> Tipo de comida</label>
-                        <select id="tipoReceta"></select>
+                        <label><i class="fas fa-tag"></i> Tipos de comida (puedes seleccionar varios)</label>
+                        <div id="multiTipo" class="multi-select"></div>
                     </div>
                     <div class="form-group">
-                        <label><i class="fas fa-flag"></i> País/Región</label>
-                        <select id="paisReceta"></select>
+                        <label><i class="fas fa-flag"></i> Países/Regiones (puedes seleccionar varios)</label>
+                        <div id="multiPais" class="multi-select"></div>
                     </div>
                     <div class="form-group full-width">
                         <label><i class="fas fa-image"></i> Imagen de la receta</label>
@@ -477,34 +556,54 @@
             <button class="btn btn-danger" onclick="eliminarTodas()"><i class="fas fa-trash-alt"></i> Eliminar todas</button>
         </div>
 
-        <div class="filtros">
-            <h3><i class="fas fa-filter"></i> Filtrar recetas</h3>
-            <div class="filtros-botones">
-                <button class="filtro-btn active" onclick="filtrarPor('todos', this)"><i class="fas fa-list"></i> Todos</button>
-                <button class="filtro-btn" onclick="filtrarPor('tipo', this)"><i class="fas fa-tag"></i> Por tipo</button>
-                <button class="filtro-btn" onclick="filtrarPor('pais', this)"><i class="fas fa-globe"></i> Por país</button>
+        <!-- Buscador -->
+        <div class="buscador">
+            <h3><i class="fas fa-search"></i> Buscador</h3>
+            <div class="buscador-input">
+                <input type="text" id="buscadorTexto" placeholder="Buscar por nombre o palabras clave..." onkeyup="aplicarFiltros()">
+                <button class="btn btn-primary" onclick="aplicarFiltros()"><i class="fas fa-search"></i> Buscar</button>
+                <button class="btn btn-secondary" onclick="limpiarBuscador()"><i class="fas fa-times"></i> Limpiar</button>
             </div>
-            <div id="filtrosOpciones" style="margin-top: 15px;"></div>
+        </div>
+
+        <div class="filtros">
+            <h3><i class="fas fa-filter"></i> Filtrar por categorías</h3>
+            <div class="filtros-botones">
+                <button class="filtro-btn active" onclick="abrirFiltroCategorias()"><i class="fas fa-tags"></i> Filtrar por tipos o países</button>
+            </div>
+            <div id="filtrosActivos" style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 8px;"></div>
         </div>
 
         <div class="recetas-grid" id="recetasGrid"></div>
         <div id="estadisticas" style="background:white; border-radius:15px; padding:20px; margin-top:20px; text-align:center;"></div>
     </div>
 
+    <!-- Modal para filtros -->
+    <div id="modalFiltros" class="modal" onclick="cerrarModalFiltros(event)">
+        <div class="modal-contenido" onclick="event.stopPropagation()" style="max-width: 500px;">
+            <span class="cerrar-modal" onclick="cerrarModalFiltros()" style="position:absolute; top:20px; right:25px; font-size:35px; cursor:pointer;">&times;</span>
+            <h3><i class="fas fa-tag"></i> Filtrar por tipos</h3>
+            <div id="filtrosTipos" style="display: flex; flex-wrap: wrap; gap: 10px; margin: 15px 0;"></div>
+            <h3><i class="fas fa-flag"></i> Filtrar por países</h3>
+            <div id="filtrosPaises" style="display: flex; flex-wrap: wrap; gap: 10px; margin: 15px 0;"></div>
+            <button class="btn btn-primary" onclick="cerrarModalFiltros()">Aplicar filtros</button>
+        </div>
+    </div>
+
+    <!-- Modal para ver/editar receta -->
     <div id="modal" class="modal" onclick="cerrarModal(event)">
         <div class="modal-contenido" onclick="event.stopPropagation()">
             <span class="cerrar-modal" onclick="cerrarModal()" style="position:absolute; top:20px; right:25px; font-size:35px; cursor:pointer;">&times;</span>
             <h2 class="modal-titulo" id="modalTitulo"></h2>
             <img class="modal-imagen" id="modalImagen">
             <div style="background:#f8f9fa; padding:15px; border-radius:10px; margin:15px 0;">
-                <label><i class="fas fa-tag"></i> Tipo:</label>
-                <select id="modalTipo" style="margin:0 10px;"></select>
-                <label><i class="fas fa-flag"></i> País:</label>
-                <select id="modalPais"></select>
+                <label><i class="fas fa-tag"></i> Tipos:</label>
+                <div id="modalTipos" style="margin: 10px 0;"></div>
+                <label><i class="fas fa-flag"></i> Países:</label>
+                <div id="modalPaises" style="margin: 10px 0;"></div>
             </div>
             <div class="modal-descripcion contenido-enriquecido" id="modalDescripcion"></div>
             <a id="modalEnlace" href="#" target="_blank" class="btn btn-primary" style="display:inline-block; text-decoration:none;"><i class="fab fa-facebook"></i> Ver video</a>
-            <button class="btn btn-primary" onclick="guardarCambiosModal()" style="margin-left:10px;"><i class="fas fa-save"></i> Guardar cambios</button>
             <button class="btn btn-primary" onclick="editarRecetaDesdeModal()" style="margin-left:10px;"><i class="fas fa-edit"></i> Editar todo</button>
         </div>
     </div>
@@ -513,7 +612,13 @@
         let recetas = [];
         let imagenSeleccionada = null;
         let recetaEditando = null;
-        let filtroActual = { tipo: 'todos', valor: null };
+        
+        let filtrosSeleccionados = {
+            tipos: [],
+            paises: []
+        };
+        
+        let busquedaActual = '';
         
         let categorias = {
             tipos: [
@@ -524,18 +629,17 @@
                 { nombre: 'Picante 🌶️', color: '#ff8787', textoColor: '#ffffff' }
             ],
             paises: [
-                { nombre: 'México 🇲🇽', bandera: '🇲🇽', color: '#ff6b6b' },
-                { nombre: 'Italia 🇮🇹', bandera: '🇮🇹', color: '#4dabf7' },
-                { nombre: 'Japón 🇯🇵', bandera: '🇯🇵', color: '#ff8787' },
-                { nombre: 'España 🇪🇸', bandera: '🇪🇸', color: '#ffd43b' },
-                { nombre: 'Francia 🇫🇷', bandera: '🇫🇷', color: '#339af0' }
+                { nombre: 'México 🇲🇽', bandera: '🇲🇽', color: '#ff6b6b', textoColor: '#ffffff' },
+                { nombre: 'Italia 🇮🇹', bandera: '🇮🇹', color: '#4dabf7', textoColor: '#ffffff' },
+                { nombre: 'Japón 🇯🇵', bandera: '🇯🇵', color: '#ff8787', textoColor: '#ffffff' },
+                { nombre: 'España 🇪🇸', bandera: '🇪🇸', color: '#ffd43b', textoColor: '#333333' }
             ]
         };
 
         let coloresSeparador = '#667eea';
 
         function cargarDatos() {
-            const guardado = localStorage.getItem('recetario_definitivo');
+            const guardado = localStorage.getItem('recetario_multicat');
             if (guardado) {
                 const datos = JSON.parse(guardado);
                 recetas = datos.recetas || [];
@@ -543,11 +647,12 @@
                 coloresSeparador = datos.coloresSeparador || '#667eea';
             }
             actualizarSelectores();
+            actualizarMultiSelectores();
             mostrarRecetas();
         }
 
         function guardarDatos() {
-            localStorage.setItem('recetario_definitivo', JSON.stringify({
+            localStorage.setItem('recetario_multicat', JSON.stringify({
                 recetas: recetas,
                 categorias: categorias,
                 coloresSeparador: coloresSeparador
@@ -555,46 +660,78 @@
         }
 
         function actualizarSelectores() {
-            const tipoSelect = document.getElementById('tipoReceta');
-            const paisSelect = document.getElementById('paisReceta');
-            
-            tipoSelect.innerHTML = '<option value="">-- Seleccionar --</option>' + 
-                categorias.tipos.map(t => `<option value="${t.nombre}">${t.nombre}</option>`).join('');
-            
-            paisSelect.innerHTML = '<option value="">-- Seleccionar --</option>' + 
-                categorias.paises.map(p => `<option value="${p.nombre}">${p.nombre}</option>`).join('');
-            
             const tiposContainer = document.getElementById('tiposContainer');
             tiposContainer.innerHTML = categorias.tipos.map((t, i) => `
                 <div class="categoria-tag" style="background:${t.color}; color:${t.textoColor};">
                     ${t.nombre}
-                    <input type="color" value="${t.color}" onchange="cambiarColorTipo(${i}, this.value)" class="color-picker-btn" style="width:25px; height:25px; border:none; border-radius:50%; cursor:pointer;">
+                    <div class="color-picker-group">
+                        <input type="color" value="${t.color}" onchange="cambiarColorTipo(${i}, this.value, 'color')" class="color-picker-btn" title="Color de fondo">
+                        <input type="color" value="${t.textoColor}" onchange="cambiarColorTipo(${i}, this.value, 'textoColor')" class="color-picker-btn" title="Color del texto">
+                    </div>
                     <i class="fas fa-times" onclick="eliminarCategoria('tipo','${t.nombre}')" style="cursor:pointer;"></i>
                 </div>
             `).join('');
             
             const paisesContainer = document.getElementById('paisesContainer');
             paisesContainer.innerHTML = categorias.paises.map((p, i) => `
-                <div class="categoria-tag" style="background:${p.color || '#ddd'}; color:${p.textoColor || '#333'}">
+                <div class="categoria-tag" style="background:${p.color}; color:${p.textoColor || '#ffffff'};">
                     ${p.nombre}
-                    <input type="color" value="${p.color || '#4dabf7'}" onchange="cambiarColorPais(${i}, this.value)" class="color-picker-btn" style="width:25px; height:25px; border:none; border-radius:50%; cursor:pointer;">
+                    <div class="color-picker-group">
+                        <input type="color" value="${p.color}" onchange="cambiarColorPais(${i}, this.value, 'color')" class="color-picker-btn" title="Color de fondo">
+                        <input type="color" value="${p.textoColor || '#ffffff'}" onchange="cambiarColorPais(${i}, this.value, 'textoColor')" class="color-picker-btn" title="Color del texto">
+                    </div>
                     <i class="fas fa-times" onclick="eliminarCategoria('pais','${p.nombre}')" style="cursor:pointer;"></i>
                 </div>
             `).join('');
         }
 
-        function cambiarColorTipo(index, nuevoColor) {
-            categorias.tipos[index].color = nuevoColor;
-            guardarDatos();
-            mostrarRecetas();
-            actualizarSelectores();
+        function actualizarMultiSelectores() {
+            const multiTipo = document.getElementById('multiTipo');
+            const multiPais = document.getElementById('multiPais');
+            
+            multiTipo.innerHTML = categorias.tipos.map(t => `
+                <label class="multi-select-option">
+                    <input type="checkbox" value="${t.nombre}" style="width: auto;">
+                    <span style="background:${t.color}; color:${t.textoColor}; padding:2px 8px; border-radius:15px;">${t.nombre}</span>
+                </label>
+            `).join('');
+            
+            multiPais.innerHTML = categorias.paises.map(p => `
+                <label class="multi-select-option">
+                    <input type="checkbox" value="${p.nombre}" style="width: auto;">
+                    <span style="background:${p.color}; color:${p.textoColor || '#ffffff'}; padding:2px 8px; border-radius:15px;">${p.nombre}</span>
+                </label>
+            `).join('');
         }
 
-        function cambiarColorPais(index, nuevoColor) {
-            categorias.paises[index].color = nuevoColor;
+        function getSelectedMultiValues(containerId) {
+            const container = document.getElementById(containerId);
+            const checkboxes = container.querySelectorAll('input[type="checkbox"]:checked');
+            return Array.from(checkboxes).map(cb => cb.value);
+        }
+
+        function setSelectedMultiValues(containerId, values) {
+            const container = document.getElementById(containerId);
+            const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                cb.checked = values.includes(cb.value);
+            });
+        }
+
+        function cambiarColorTipo(index, nuevoColor, propiedad) {
+            categorias.tipos[index][propiedad] = nuevoColor;
             guardarDatos();
             mostrarRecetas();
             actualizarSelectores();
+            actualizarMultiSelectores();
+        }
+
+        function cambiarColorPais(index, nuevoColor, propiedad) {
+            categorias.paises[index][propiedad] = nuevoColor;
+            guardarDatos();
+            mostrarRecetas();
+            actualizarSelectores();
+            actualizarMultiSelectores();
         }
 
         function agregarCategoria(tipo) {
@@ -614,12 +751,14 @@
                     categorias.paises.push({ 
                         nombre: nuevoNombre, 
                         bandera: '🏳️',
-                        color: '#' + Math.floor(Math.random()*16777215).toString(16)
+                        color: '#' + Math.floor(Math.random()*16777215).toString(16),
+                        textoColor: '#ffffff'
                     });
                     document.getElementById('nuevoPais').value = '';
                 }
             }
             actualizarSelectores();
+            actualizarMultiSelectores();
             guardarDatos();
         }
 
@@ -627,12 +766,17 @@
             if (confirm(`¿Eliminar "${valor}"?`)) {
                 if (tipo === 'tipo') {
                     categorias.tipos = categorias.tipos.filter(t => t.nombre !== valor);
-                    recetas.forEach(r => { if (r.tipo === valor) r.tipo = ''; });
+                    recetas.forEach(r => { 
+                        if (r.tipos) r.tipos = r.tipos.filter(t => t !== valor);
+                    });
                 } else {
                     categorias.paises = categorias.paises.filter(p => p.nombre !== valor);
-                    recetas.forEach(r => { if (r.pais === valor) r.pais = ''; });
+                    recetas.forEach(r => { 
+                        if (r.paises) r.paises = r.paises.filter(p => p !== valor);
+                    });
                 }
                 actualizarSelectores();
+                actualizarMultiSelectores();
                 guardarDatos();
                 mostrarRecetas();
             }
@@ -643,9 +787,9 @@
             return tipo ? tipo.color : '#667eea';
         }
 
-        function getColorPorPais(paisNombre) {
-            const pais = categorias.paises.find(p => p.nombre === paisNombre);
-            return pais ? pais.color : '#28a745';
+        function getTextoColorPorTipo(tipoNombre) {
+            const tipo = categorias.tipos.find(t => t.nombre === tipoNombre);
+            return tipo ? tipo.textoColor : '#ffffff';
         }
 
         function getBanderaPorPais(paisNombre) {
@@ -712,11 +856,15 @@
                 return;
             }
             
+            const tiposSeleccionados = getSelectedMultiValues('multiTipo');
+            const paisesSeleccionados = getSelectedMultiValues('multiPais');
+            
             const recetaData = {
+                id: editandoId ? parseInt(editandoId) : Date.now(),
                 nombre: nombre,
                 descripcion: document.getElementById('editorContenido').innerHTML,
-                tipo: document.getElementById('tipoReceta').value,
-                pais: document.getElementById('paisReceta').value,
+                tipos: tiposSeleccionados,
+                paises: paisesSeleccionados,
                 video: document.getElementById('urlVideo').value,
                 imagen: imagenSeleccionada || '',
                 fecha: new Date().toISOString()
@@ -725,12 +873,10 @@
             if (editandoId) {
                 const index = recetas.findIndex(r => r.id == editandoId);
                 if (index !== -1) {
-                    recetaData.id = parseInt(editandoId);
                     recetas[index] = recetaData;
                 }
                 cancelarEdicion();
             } else {
-                recetaData.id = Date.now();
                 recetas.push(recetaData);
             }
             
@@ -744,10 +890,11 @@
             document.getElementById('nombreReceta').value = '';
             document.getElementById('editorContenido').innerHTML = '';
             document.getElementById('urlVideo').value = '';
-            document.getElementById('tipoReceta').value = '';
-            document.getElementById('paisReceta').value = '';
             document.getElementById('editandoId').value = '';
             eliminarImagenSeleccionada();
+            
+            const checkboxes = document.querySelectorAll('#multiTipo input, #multiPais input');
+            checkboxes.forEach(cb => cb.checked = false);
         }
 
         function cancelarEdicion() {
@@ -762,10 +909,11 @@
             document.getElementById('nombreReceta').value = receta.nombre;
             document.getElementById('editorContenido').innerHTML = receta.descripcion || '';
             document.getElementById('urlVideo').value = receta.video || '';
-            document.getElementById('tipoReceta').value = receta.tipo || '';
-            document.getElementById('paisReceta').value = receta.pais || '';
             document.getElementById('editandoId').value = receta.id;
             document.getElementById('btnCancelarEdicion').style.display = 'inline-block';
+            
+            setSelectedMultiValues('multiTipo', receta.tipos || []);
+            setSelectedMultiValues('multiPais', receta.paises || []);
             
             if (receta.imagen) {
                 imagenSeleccionada = receta.imagen;
@@ -776,33 +924,145 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        function aplicarFiltros() {
+            busquedaActual = document.getElementById('buscadorTexto').value.toLowerCase();
+            mostrarRecetas();
+        }
+
+        function limpiarBuscador() {
+            document.getElementById('buscadorTexto').value = '';
+            busquedaActual = '';
+            mostrarRecetas();
+        }
+
+        function abrirFiltroCategorias() {
+            const filtrosTipos = document.getElementById('filtrosTipos');
+            const filtrosPaises = document.getElementById('filtrosPaises');
+            
+            filtrosTipos.innerHTML = categorias.tipos.map(t => `
+                <div class="filtro-tipo-item" style="background:${t.color}; color:${t.textoColor}; padding:5px 12px; border-radius:20px; cursor:pointer; ${filtrosSeleccionados.tipos.includes(t.nombre) ? 'border:2px solid #333;' : ''}"
+                     onclick="toggleFiltroTipo('${t.nombre}')">
+                    ${t.nombre}
+                </div>
+            `).join('');
+            
+            filtrosPaises.innerHTML = categorias.paises.map(p => `
+                <div class="filtro-pais-item" style="background:${p.color}; color:${p.textoColor || '#ffffff'}; padding:5px 12px; border-radius:20px; cursor:pointer; ${filtrosSeleccionados.paises.includes(p.nombre) ? 'border:2px solid #333;' : ''}"
+                     onclick="toggleFiltroPais('${p.nombre}')">
+                    ${p.bandera} ${p.nombre}
+                </div>
+            `).join('');
+            
+            document.getElementById('modalFiltros').style.display = 'flex';
+        }
+
+        function toggleFiltroTipo(tipo) {
+            const index = filtrosSeleccionados.tipos.indexOf(tipo);
+            if (index === -1) {
+                filtrosSeleccionados.tipos.push(tipo);
+            } else {
+                filtrosSeleccionados.tipos.splice(index, 1);
+            }
+            mostrarRecetas();
+            actualizarIndicadoresFiltros();
+        }
+
+        function toggleFiltroPais(pais) {
+            const index = filtrosSeleccionados.paises.indexOf(pais);
+            if (index === -1) {
+                filtrosSeleccionados.paises.push(pais);
+            } else {
+                filtrosSeleccionados.paises.splice(index, 1);
+            }
+            mostrarRecetas();
+            actualizarIndicadoresFiltros();
+        }
+
+        function actualizarIndicadoresFiltros() {
+            const container = document.getElementById('filtrosActivos');
+            const totalFiltros = filtrosSeleccionados.tipos.length + filtrosSeleccionados.paises.length;
+            
+            if (totalFiltros === 0) {
+                container.innerHTML = '<span style="color:#999;">No hay filtros activos</span>';
+                return;
+            }
+            
+            let html = '';
+            filtrosSeleccionados.tipos.forEach(t => {
+                const tipo = categorias.tipos.find(ct => ct.nombre === t);
+                html += `<span style="background:${tipo.color}; color:${tipo.textoColor}; padding:4px 10px; border-radius:20px; font-size:12px;">
+                            <i class="fas fa-tag"></i> ${t}
+                            <i class="fas fa-times" onclick="toggleFiltroTipo('${t}')" style="margin-left:5px; cursor:pointer;"></i>
+                        </span>`;
+            });
+            filtrosSeleccionados.paises.forEach(p => {
+                const pais = categorias.paises.find(cp => cp.nombre === p);
+                html += `<span style="background:${pais.color}; color:${pais.textoColor}; padding:4px 10px; border-radius:20px; font-size:12px;">
+                            <i class="fas fa-flag"></i> ${p}
+                            <i class="fas fa-times" onclick="toggleFiltroPais('${p}')" style="margin-left:5px; cursor:pointer;"></i>
+                        </span>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function cerrarModalFiltros() {
+            document.getElementById('modalFiltros').style.display = 'none';
+            mostrarRecetas();
+        }
+
         function mostrarRecetas() {
             let recetasFiltradas = [...recetas];
             
-            if (filtroActual.tipo === 'tipo' && filtroActual.valor) {
-                recetasFiltradas = recetasFiltradas.filter(r => r.tipo === filtroActual.valor);
-            } else if (filtroActual.tipo === 'pais' && filtroActual.valor) {
-                recetasFiltradas = recetasFiltradas.filter(r => r.pais === filtroActual.valor);
+            // Filtrar por búsqueda
+            if (busquedaActual) {
+                recetasFiltradas = recetasFiltradas.filter(r => 
+                    r.nombre.toLowerCase().includes(busquedaActual) ||
+                    (r.descripcion && r.descripcion.toLowerCase().includes(busquedaActual))
+                );
+            }
+            
+            // Filtrar por tipos seleccionados
+            if (filtrosSeleccionados.tipos.length > 0) {
+                recetasFiltradas = recetasFiltradas.filter(r => 
+                    r.tipos && r.tipos.some(t => filtrosSeleccionados.tipos.includes(t))
+                );
+            }
+            
+            // Filtrar por países seleccionados
+            if (filtrosSeleccionados.paises.length > 0) {
+                recetasFiltradas = recetasFiltradas.filter(r => 
+                    r.paises && r.paises.some(p => filtrosSeleccionados.paises.includes(p))
+                );
             }
             
             const grid = document.getElementById('recetasGrid');
             
             if (recetasFiltradas.length === 0) {
-                grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:50px; background:white; border-radius:20px;"><i class="fas fa-book-open fa-3x"></i><p>✨ No hay recetas ✨</p></div>';
-                document.getElementById('estadisticas').innerHTML = `<i class="fas fa-chart-bar"></i> Total: ${recetas.length} recetas`;
+                grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:50px; background:white; border-radius:20px;"><i class="fas fa-book-open fa-3x"></i><p>✨ No hay recetas que coincidan con los filtros ✨</p></div>';
+                document.getElementById('estadisticas').innerHTML = `<i class="fas fa-chart-bar"></i> Total: ${recetas.length} recetas | Mostrando: 0`;
                 return;
             }
             
             grid.innerHTML = '';
             recetasFiltradas.forEach(receta => {
-                const colorFondo = getColorPorTipo(receta.tipo) || '#667eea';
-                const colorTexto = '#ffffff';
+                const primerTipo = receta.tipos && receta.tipos.length > 0 ? receta.tipos[0] : null;
+                const colorFondo = primerTipo ? getColorPorTipo(primerTipo) : '#667eea';
+                const colorTexto = primerTipo ? getTextoColorPorTipo(primerTipo) : '#ffffff';
                 const tarjeta = document.createElement('div');
                 tarjeta.className = 'tarjeta';
                 tarjeta.style.background = colorFondo;
                 tarjeta.style.color = colorTexto;
                 
                 let descripcionPreview = receta.descripcion ? receta.descripcion.replace(/<[^>]*>/g, '').substring(0, 100) : 'Sin descripción';
+                
+                const tiposHtml = (receta.tipos || []).map(t => {
+                    const tipo = categorias.tipos.find(ct => ct.nombre === t);
+                    return `<span class="badge-categoria" style="background:rgba(255,255,255,0.3);"><i class="fas fa-tag"></i> ${t}</span>`;
+                }).join('');
+                
+                const paisesHtml = (receta.paises || []).map(p => {
+                    return `<span class="badge-categoria" style="background:rgba(255,255,255,0.3);"><i class="fas fa-flag"></i> ${getBanderaPorPais(p)} ${p}</span>`;
+                }).join('');
                 
                 tarjeta.innerHTML = `
                     <img class="tarjeta-imagen" src="${receta.imagen || 'https://via.placeholder.com/400x200?text=🍳+Sin+imagen'}" 
@@ -812,8 +1072,8 @@
                             <i class="fas fa-utensil-spoon"></i> ${receta.nombre}
                         </div>
                         <div class="categorias-marcadores">
-                            ${receta.tipo ? `<span class="badge-categoria" style="background:rgba(255,255,255,0.3);"><i class="fas fa-tag"></i> ${receta.tipo}</span>` : ''}
-                            ${receta.pais ? `<span class="badge-categoria" style="background:rgba(255,255,255,0.3);"><i class="fas fa-flag"></i> ${getBanderaPorPais(receta.pais)} ${receta.pais}</span>` : ''}
+                            ${tiposHtml}
+                            ${paisesHtml}
                         </div>
                         <div class="tarjeta-descripcion">${descripcionPreview}</div>
                         <button class="btn-accion" onclick="verReceta(${receta.id})" style="background:rgba(255,255,255,0.2); color:inherit;"><i class="fas fa-eye"></i> Ver detalles</button>
@@ -837,14 +1097,18 @@
             document.getElementById('modalEnlace').href = receta.video || '#';
             document.getElementById('modalEnlace').style.display = receta.video ? 'inline-flex' : 'none';
             
-            const tipoSelect = document.getElementById('modalTipo');
-            const paisSelect = document.getElementById('modalPais');
+            const modalTipos = document.getElementById('modalTipos');
+            const modalPaises = document.getElementById('modalPaises');
             
-            tipoSelect.innerHTML = '<option value="">-- Sin categoría --</option>' + 
-                categorias.tipos.map(t => `<option value="${t.nombre}" ${receta.tipo === t.nombre ? 'selected' : ''}>${t.nombre}</option>`).join('');
+            modalTipos.innerHTML = (receta.tipos || []).map(t => {
+                const tipo = categorias.tipos.find(ct => ct.nombre === t);
+                return `<span style="background:${tipo.color}; color:${tipo.textoColor}; padding:4px 12px; border-radius:20px; margin:5px; display:inline-block;"><i class="fas fa-tag"></i> ${t}</span>`;
+            }).join('') || '<span style="color:#999;">Sin tipos</span>';
             
-            paisSelect.innerHTML = '<option value="">-- Sin categoría --</option>' + 
-                categorias.paises.map(p => `<option value="${p.nombre}" ${receta.pais === p.nombre ? 'selected' : ''}>${p.nombre}</option>`).join('');
+            modalPaises.innerHTML = (receta.paises || []).map(p => {
+                const pais = categorias.paises.find(cp => cp.nombre === p);
+                return `<span style="background:${pais.color}; color:${pais.textoColor}; padding:4px 12px; border-radius:20px; margin:5px; display:inline-block;"><i class="fas fa-flag"></i> ${pais.bandera} ${p}</span>`;
+            }).join('') || '<span style="color:#999;">Sin países</span>';
             
             recetaEditando = receta;
             document.getElementById('modal').style.display = 'flex';
@@ -854,17 +1118,6 @@
             if (recetaEditando) {
                 cerrarModal();
                 editarReceta(recetaEditando.id);
-            }
-        }
-        
-        function guardarCambiosModal() {
-            if (recetaEditando) {
-                recetaEditando.tipo = document.getElementById('modalTipo').value;
-                recetaEditando.pais = document.getElementById('modalPais').value;
-                guardarDatos();
-                mostrarRecetas();
-                cerrarModal();
-                alert('✅ Categorías actualizadas');
             }
         }
         
@@ -884,40 +1137,22 @@
             }
         }
         
-        function filtrarPor(tipo, elemento) {
-            document.querySelectorAll('.filtro-btn').forEach(btn => btn.classList.remove('active'));
-            elemento.classList.add('active');
-            
-            const opcionesDiv = document.getElementById('filtrosOpciones');
-            
-            if (tipo === 'todos') {
-                filtroActual = { tipo: 'todos', valor: null };
-                opcionesDiv.innerHTML = '';
-                mostrarRecetas();
-            } else if (tipo === 'tipo') {
-                opcionesDiv.innerHTML = `<div class="filtros-botones">${categorias.tipos.map(t => `<button class="filtro-btn" style="background:${t.color}; color:${t.textoColor};" onclick="filtrarPorValor('tipo','${t.nombre}', this)">${t.nombre}</button>`).join('')}</div>`;
-            } else if (tipo === 'pais') {
-                opcionesDiv.innerHTML = `<div class="filtros-botones">${categorias.paises.map(p => `<button class="filtro-btn" style="background:${p.color || '#4dabf7'}; color:white;" onclick="filtrarPorValor('pais','${p.nombre}', this)">${p.bandera} ${p.nombre}</button>`).join('')}</div>`;
-            }
-        }
-        
-        function filtrarPorValor(tipo, valor, elemento) {
-            document.querySelectorAll('#filtrosOpciones .filtro-btn').forEach(btn => btn.classList.remove('active'));
-            elemento.classList.add('active');
-            filtroActual = { tipo: tipo, valor: valor };
-            mostrarRecetas();
-        }
-        
         function exportarRecetario() {
-            const datosCompletos = { recetas, categorias, coloresSeparador, version: '4.0' };
+            const datosCompletos = { 
+                recetas: recetas, 
+                categorias: categorias, 
+                coloresSeparador: coloresSeparador, 
+                version: '5.0',
+                fechaExportacion: new Date().toISOString()
+            };
             const blob = new Blob([JSON.stringify(datosCompletos, null, 2)], {type: 'application/json'});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `recetario_definitivo_${new Date().toISOString().split('T')[0]}.json`;
+            a.download = `recetario_multicat_${new Date().toISOString().split('T')[0]}.json`;
             a.click();
             URL.revokeObjectURL(url);
-            alert('✅ Recetario exportado con imágenes incluidas');
+            alert('✅ Recetario exportado con múltiples categorías');
         }
         
         function importarRecetario() {
@@ -932,13 +1167,24 @@
                         const datos = JSON.parse(evt.target.result);
                         if (datos.recetas) {
                             recetas = datos.recetas;
-                            if (datos.categorias) categorias = datos.categorias;
+                            if (datos.categorias) {
+                                datos.categorias.tipos.forEach(tipo => {
+                                    if (!tipo.textoColor) tipo.textoColor = '#ffffff';
+                                });
+                                datos.categorias.paises.forEach(pais => {
+                                    if (!pais.textoColor) pais.textoColor = '#ffffff';
+                                });
+                                categorias = datos.categorias;
+                            }
                             if (datos.coloresSeparador) coloresSeparador = datos.coloresSeparador;
                             guardarDatos();
                             actualizarSelectores();
+                            actualizarMultiSelectores();
                             mostrarRecetas();
                             alert(`✅ Importadas ${recetas.length} recetas`);
-                        } else alert('Formato inválido');
+                        } else {
+                            alert('Formato inválido');
+                        }
                     } catch (error) {
                         alert('Error al leer el archivo');
                     }
