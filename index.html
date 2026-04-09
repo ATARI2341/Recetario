@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recetario Avanzado - Categorías e Imágenes Locales</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header y formularios */
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        /* Grid de dos columnas para categorías */
+        .categorias-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .categoria-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .categoria-box h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .categoria-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .categoria-tag {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .categoria-tag.selected {
+            border-color: #333;
+            transform: scale(1.05);
+        }
+
+        .nueva-categoria {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .nueva-categoria input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        /* Formulario de receta */
+        .formulario {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        .imagen-upload {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+            cursor: pointer;
+            background: white;
+        }
+
+        .imagen-preview {
+            margin-top: 10px;
+            max-width: 200px;
+            display: none;
+        }
+
+        .imagen-preview img {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        /* Filtros */
+        .filtros {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .filtros h3 {
+            margin-bottom: 15px;
+        }
+
+        .filtros-botones {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .filtro-btn {
+            padding: 8px 16px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filtro-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        /* Grid de recetas */
+        .recetas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        /* Tarjeta de receta */
+        .tarjeta {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .tarjeta:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .tarjeta-imagen {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: #f0f0f0;
+        }
+
+        .tarjeta-contenido {
+            padding: 20px;
+        }
+
+        .tarjeta-titulo {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .categorias-marcadores {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin: 10px 0;
+        }
+
+        .badge-categoria {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .btn-accion {
+            background: #f0f0f0;
+            border: none;
+            padding: 8px;
+            margin-top: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-contenido {
+            background: white;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border-radius: 20px;
+            padding: 30px;
+            position: relative;
+        }
+
+        .modal-selectores {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .categorias-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍳 Recetario Avanzado</h1>
+            <p>Categorías por tipo de comida y país | Imágenes guardadas localmente</p>
+
+            <!-- Panel de categorías -->
+            <div class="categorias-panel">
+                <div class="categoria-box">
+                    <h3>🍽️ Tipos de comida</h3>
+                    <div class="categoria-items" id="tiposContainer"></div>
+                    <div class="nueva-categoria">
+                        <input type="text" id="nuevoTipo" placeholder="Nuevo tipo (ej: Vegano)">
+                        <button class="btn" onclick="agregarCategoria('tipo')">+</button>
+                    </div>
+                </div>
+                <div class="categoria-box">
+                    <h3>🌍 Países / Regiones</h3>
+                    <div class="categoria-items" id="paisesContainer"></div>
+                    <div class="nueva-categoria">
+                        <input type="text" id="nuevoPais" placeholder="Nuevo país (ej: México)">
+                        <button class="btn" onclick="agregarCategoria('pais')">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulario para agregar receta -->
+            <div class="formulario">
+                <h3>➕ Agregar nueva receta</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>📝 Nombre de la receta *</label>
+                        <input type="text" id="nombreReceta" placeholder="Ej: Tacos al pastor">
+                    </div>
+                    <div class="form-group">
+                        <label>🎬 Enlace del video (Facebook, YouTube)</label>
+                        <input type="text" id="urlVideo" placeholder="https://...">
+                    </div>
+                    <div class="form-group">
+                        <label>🍽️ Tipo de comida</label>
+                        <select id="tipoReceta">
+                            <option value="">-- Seleccionar --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>🌍 País/Región</label>
+                        <select id="paisReceta">
+                            <option value="">-- Seleccionar --</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>📖 Descripción / Ingredientes</label>
+                        <textarea id="descripcionReceta" rows="3" placeholder="Describe la receta..."></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>🖼️ Imagen de la receta (se guarda localmente)</label>
+                        <div class="imagen-upload" onclick="document.getElementById('inputImagen').click()">
+                            📸 Haz clic para seleccionar una imagen
+                            <input type="file" id="inputImagen" accept="image/*" style="display:none" onchange="previewImagen(this)">
+                        </div>
+                        <div class="imagen-preview" id="imagenPreview">
+                            <img id="previewImg" src="">
+                            <button class="btn-accion" onclick="eliminarImagenSeleccionada()">🗑️ Quitar imagen</button>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn" onclick="agregarReceta()">💾 Guardar receta</button>
+            </div>
+        </div>
+
+        <!-- Barra de herramientas -->
+        <div class="toolbar">
+            <button class="btn" onclick="exportarRecetario()">📤 Exportar recetario completo</button>
+            <button class="btn btn-success" onclick="importarRecetario()">📥 Importar recetario</button>
+            <button class="btn btn-danger" onclick="eliminarTodas()">🗑️ Eliminar todas</button>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filtros">
+            <h3>🔍 Filtrar recetas</h3>
+            <div class="filtros-botones">
+                <button class="filtro-btn active" onclick="filtrarPor('todos', this)">📋 Todos</button>
+                <button class="filtro-btn" onclick="filtrarPor('tipo', this)">🍽️ Por tipo</button>
+                <button class="filtro-btn" onclick="filtrarPor('pais', this)">🌍 Por país</button>
+            </div>
+            <div id="filtrosOpciones" style="margin-top: 15px;"></div>
+        </div>
+
+        <div class="recetas-grid" id="recetasGrid"></div>
+        <div class="estadisticas" id="estadisticas" style="background:white; border-radius:15px; padding:15px; margin-top:20px; text-align:center;"></div>
+    </div>
+
+    <!-- Modal para editar/ver receta -->
+    <div id="modal" class="modal" onclick="cerrarModal(event)">
+        <div class="modal-contenido" onclick="event.stopPropagation()">
+            <span class="cerrar-modal" onclick="cerrarModal()" style="position:absolute; top:15px; right:20px; font-size:30px; cursor:pointer;">&times;</span>
+            <h2 id="modalTitulo"></h2>
+            <img id="modalImagen" style="width:100%; border-radius:15px; margin:15px 0;">
+            <div class="modal-selectores">
+                <label>🍽️ Tipo de comida:</label>
+                <select id="modalTipo" style="margin-bottom:15px;"></select>
+                <label>🌍 País/Región:</label>
+                <select id="modalPais"></select>
+            </div>
+            <div id="modalDescripcion" style="margin:15px 0;"></div>
+            <a id="modalEnlace" href="#" target="_blank" style="display:inline-block; background:#4267B2; color:white; padding:10px 20px; border-radius:10px; text-decoration:none;">🎬 Ver video</a>
+            <button class="btn" style="margin-left:10px;" onclick="guardarCambiosModal()">💾 Guardar cambios</button>
+        </div>
+    </div>
+
+    <script>
+        // Estructura de datos
+        let recetas = [];
+        let categorias = {
+            tipos: ['Salado', 'Dulce', 'Dieta', 'Vegetariano'],
+            paises: ['México', 'Italia', 'Japón', 'España']
+        };
+        
+        let filtroActual = { tipo: 'todos', valor: null };
+
+        // Cargar datos guardados
+        function cargarDatos() {
+            const guardado = localStorage.getItem('recetario_avanzado');
+            if (guardado) {
+                const datos = JSON.parse(guardado);
+                recetas = datos.recetas || [];
+                categorias = datos.categorias || categorias;
+            }
+            actualizarSelectores();
+            mostrarRecetas();
+        }
+
+        // Guardar todo
+        function guardarDatos() {
+            const datos = {
+                recetas: recetas,
+                categorias: categorias,
+                version: '2.0'
+            };
+            localStorage.setItem('recetario_avanzado', JSON.stringify(datos));
+        }
+
+        // Actualizar selectores y contenedores
+        function actualizarSelectores() {
+            // Selectores del formulario
+            const tipoSelect = document.getElementById('tipoReceta');
+            const paisSelect = document.getElementById('paisReceta');
+            
+            tipoSelect.innerHTML = '<option value="">-- Seleccionar --</option>' + 
+                categorias.tipos.map(t => `<option value="${t}">${t}</option>`).join('');
+            
+            paisSelect.innerHTML = '<option value="">-- Seleccionar --</option>' + 
+                categorias.paises.map(p => `<option value="${p}">${p}</option>`).join('');
+            
+            // Contenedores visuales
+            const tiposContainer = document.getElementById('tiposContainer');
+            const paisesContainer = document.getElementById('paisesContainer');
+            
+            tiposContainer.innerHTML = categorias.tipos.map(t => `
+                <div class="categoria-tag" style="background:linear-gradient(135deg, #667eea20, #764ba220);">
+                    ${t} 
+                    <span onclick="eliminarCategoria('tipo','${t}')" style="cursor:pointer; margin-left:5px;">❌</span>
+                </div>
+            `).join('');
+            
+            paisesContainer.innerHTML = categorias.paises.map(p => `
+                <div class="categoria-tag" style="background:linear-gradient(135deg, #28a74520, #20c99720);">
+                    ${p} 
+                    <span onclick="eliminarCategoria('pais','${p}')" style="cursor:pointer; margin-left:5px;">❌</span>
+                </div>
+            `).join('');
+        }
+
+        // Agregar nueva categoría
+        function agregarCategoria(tipo) {
+            let nuevoValor;
+            if (tipo === 'tipo') {
+                nuevoValor = document.getElementById('nuevoTipo').value.trim();
+                if (nuevoValor && !categorias.tipos.includes(nuevoValor)) {
+                    categorias.tipos.push(nuevoValor);
+                    document.getElementById('nuevoTipo').value = '';
+                }
+            } else {
+                nuevoValor = document.getElementById('nuevoPais').value.trim();
+                if (nuevoValor && !categorias.paises.includes(nuevoValor)) {
+                    categorias.paises.push(nuevoValor);
+                    document.getElementById('nuevoPais').value = '';
+                }
+            }
+            actualizarSelectores();
+            guardarDatos();
+        }
+
+        // Eliminar categoría
+        function eliminarCategoria(tipo, valor) {
+            if (confirm(`¿Eliminar "${valor}"? Las recetas con esta categoría quedarán sin categoría`)) {
+                if (tipo === 'tipo') {
+                    categorias.tipos = categorias.tipos.filter(t => t !== valor);
+                    recetas.forEach(r => { if (r.tipo === valor) r.tipo = ''; });
+                } else {
+                    categorias.paises = categorias.paises.filter(p => p !== valor);
+                    recetas.forEach(r => { if (r.pais === valor) r.pais = ''; });
+                }
+                actualizarSelectores();
+                guardarDatos();
+                mostrarRecetas();
+            }
+        }
+
+        // Preview de imagen
+        let imagenSeleccionada = null;
+        
+        function previewImagen(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagenSeleccionada = e.target.result;
+                    document.getElementById('previewImg').src = imagenSeleccionada;
+                    document.getElementById('imagenPreview').style.display = 'block';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        
+        function eliminarImagenSeleccionada() {
+            imagenSeleccionada = null;
+            document.getElementById('imagenPreview').style.display = 'none';
+            document.getElementById('inputImagen').value = '';
+        }
+
+        // Agregar receta
+        function agregarReceta() {
+            const nombre = document.getElementById('nombreReceta').value.trim();
+            if (!nombre) {
+                alert('Escribe el nombre de la receta');
+                return;
+            }
+            
+            const nuevaReceta = {
+                id: Date.now(),
+                nombre: nombre,
+                descripcion: document.getElementById('descripcionReceta').value,
+                tipo: document.getElementById('tipoReceta').value,
+                pais: document.getElementById('paisReceta').value,
+                video: document.getElementById('urlVideo').value,
+                imagen: imagenSeleccionada || '',
+                fecha: new Date().toISOString()
+            };
+            
+            recetas.push(nuevaReceta);
+            guardarDatos();
+            mostrarRecetas();
+            
+            // Limpiar formulario
+            document.getElementById('nombreReceta').value = '';
+            document.getElementById('descripcionReceta').value = '';
+            document.getElementById('urlVideo').value = '';
+            document.getElementById('tipoReceta').value = '';
+            document.getElementById('paisReceta').value = '';
+            eliminarImagenSeleccionada();
+            
+            alert('✅ Receta guardada con imagen local');
+        }
+
+        // Mostrar recetas
+        function mostrarRecetas() {
+            let recetasFiltradas = [...recetas];
+            
+            if (filtroActual.tipo === 'tipo' && filtroActual.valor) {
+                recetasFiltradas = recetasFiltradas.filter(r => r.tipo === filtroActual.valor);
+            } else if (filtroActual.tipo === 'pais' && filtroActual.valor) {
+                recetasFiltradas = recetasFiltradas.filter(r => r.pais === filtroActual.valor);
+            }
+            
+            const grid = document.getElementById('recetasGrid');
+            const estadisticas = document.getElementById('estadisticas');
+            
+            if (recetasFiltradas.length === 0) {
+                grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:50px; background:white; border-radius:20px;">✨ No hay recetas que coincidan con el filtro ✨</div>';
+                estadisticas.innerHTML = `📊 Total: ${recetas.length} recetas guardadas | Mostrando: 0`;
+                return;
+            }
+            
+            grid.innerHTML = '';
+            recetasFiltradas.forEach(receta => {
+                const tarjeta = document.createElement('div');
+                tarjeta.className = 'tarjeta';
+                tarjeta.innerHTML = `
+                    <img class="tarjeta-imagen" src="${receta.imagen || 'https://via.placeholder.com/300x200?text=Sin+imagen'}" 
+                         onerror="this.src='https://via.placeholder.com/300x200?text=Imagen+no+disponible'">
+                    <div class="tarjeta-contenido">
+                        <div class="tarjeta-titulo">${receta.nombre}</div>
+                        <div class="categorias-marcadores">
+                            ${receta.tipo ? `<span class="badge-categoria" style="background:#667eea20; color:#667eea;">🍽️ ${receta.tipo}</span>` : ''}
+                            ${receta.pais ? `<span class="badge-categoria" style="background:#28a74520; color:#28a745;">🌍 ${receta.pais}</span>` : ''}
+                        </div>
+                        <div class="tarjeta-descripcion">${(receta.descripcion || 'Sin descripción').substring(0, 80)}...</div>
+                        <button class="btn-accion" onclick="abrirModal(${receta.id})">✏️ Editar / Ver detalles</button>
+                        <button class="btn-accion" onclick="eliminarReceta(${receta.id})" style="background:#dc3545; color:white;">🗑️ Eliminar</button>
+                    </div>
+                `;
+                grid.appendChild(tarjeta);
+            });
+            
+            estadisticas.innerHTML = `📊 Total: ${recetas.length} recetas guardadas | Mostrando: ${recetasFiltradas.length}`;
+        }
+
+        // Filtrar
+        function filtrarPor(tipo, elemento) {
+            document.querySelectorAll('.filtro-btn').forEach(btn => btn.classList.remove('active'));
+            elemento.classList.add('active');
+            
+            const opcionesDiv = document.getElementById('filtrosOpciones');
+            
+            if (tipo === 'todos') {
+                filtroActual = { tipo: 'todos', valor: null };
+                opcionesDiv.innerHTML = '';
+                mostrarRecetas();
+            } else if (tipo === 'tipo') {
+                opcionesDiv.innerHTML = `
+                    <div class="filtros-botones">
+                        ${categorias.tipos.map(t => `<button class="filtro-btn" onclick="filtrarPorValor('tipo','${t}', this)">${t}</button>`).join('')}
+                    </div>
+                `;
+            } else if (tipo === 'pais') {
+                opcionesDiv.innerHTML = `
+                    <div class="filtros-botones">
+                        ${categorias.paises.map(p => `<button class="filtro-btn" onclick="filtrarPorValor('pais','${p}', this)">${p}</button>`).join('')}
+                    </div>
+                `;
+            }
+        }
+        
+        function filtrarPorValor(tipo, valor, elemento) {
+            document.querySelectorAll('#filtrosOpciones .filtro-btn').forEach(btn => btn.classList.remove('active'));
+            elemento.classList.add('active');
+            filtroActual = { tipo: tipo, valor: valor };
+            mostrarRecetas();
+        }
+
+        // Modal para editar
+        let recetaEditando = null;
+        
+        function abrirModal(id) {
+            recetaEditando = recetas.find(r => r.id === id);
+            if (!recetaEditando) return;
+            
+            document.getElementById('modalTitulo').innerText = recetaEditando.nombre;
+            document.getElementById('modalImagen').src = recetaEditando.imagen || 'https://via.placeholder.com/500x300?text=Sin+imagen';
+            document.getElementById('modalDescripcion').innerHTML = `<strong>Descripción:</strong><br>${recetaEditando.descripcion || 'Sin descripción'}`;
+            document.getElementById('modalEnlace').href = recetaEditando.video || '#';
+            if (!recetaEditando.video) document.getElementById('modalEnlace').style.display = 'none';
+            else document.getElementById('modalEnlace').style.display = 'inline-block';
+            
+            // Llenar selectores del modal
+            const tipoSelect = document.getElementById('modalTipo');
+            const paisSelect = document.getElementById('modalPais');
+            
+            tipoSelect.innerHTML = '<option value="">-- Sin categoría --</option>' + 
+                categorias.tipos.map(t => `<option value="${t}" ${recetaEditando.tipo === t ? 'selected' : ''}>${t}</option>`).join('');
+            
+            paisSelect.innerHTML = '<option value="">-- Sin categoría --</option>' + 
+                categorias.paises.map(p => `<option value="${p}" ${recetaEditando.pais === p ? 'selected' : ''}>${p}</option>`).join('');
+            
+            document.getElementById('modal').style.display = 'flex';
+        }
+        
+        function guardarCambiosModal() {
+            if (recetaEditando) {
+                recetaEditando.tipo = document.getElementById('modalTipo').value;
+                recetaEditando.pais = document.getElementById('modalPais').value;
+                guardarDatos();
+                mostrarRecetas();
+                cerrarModal();
+                alert('✅ Categorías actualizadas');
+            }
+        }
+        
+        function eliminarReceta(id) {
+            if (confirm('¿Eliminar esta receta?')) {
+                recetas = recetas.filter(r => r.id !== id);
+                guardarDatos();
+                mostrarRecetas();
+            }
+        }
+        
+        function eliminarTodas() {
+            if (confirm('⚠️ ¿Eliminar TODAS las recetas? Esta acción no se puede deshacer')) {
+                recetas = [];
+                guardarDatos();
+                mostrarRecetas();
+                alert('Todas las recetas eliminadas');
+            }
+        }
+        
+        // Exportar (incluye imágenes)
+        function exportarRecetario() {
+            if (recetas.length === 0 && categorias.tipos.length === 0) {
+                alert('No hay datos para exportar');
+                return;
+            }
+            
+            const datosCompletos = {
+                recetas: recetas,
+                categorias: categorias,
+                version: '2.0',
+                fechaExportacion: new Date().toISOString()
+            };
+            
+            const json = JSON.stringify(datosCompletos, null, 2);
+            const blob = new Blob([json], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `recetario_completo_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            alert('✅ Recetario exportado (las imágenes están incluidas)');
+        }
+        
+        // Importar
+        function importarRecetario() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    try {
+                        const datos = JSON.parse(evt.target.result);
+                        if (datos.recetas && Array.isArray(datos.recetas)) {
+                            recetas = datos.recetas;
+                            if (datos.categorias) categorias = datos.categorias;
+                            guardarDatos();
+                            actualizarSelectores();
+                            mostrarRecetas();
+                            alert(`✅ Importadas ${recetas.length} recetas con sus imágenes incluidas`);
+                        } else {
+                            alert('Formato de archivo inválido');
+                        }
+                    } catch (error) {
+                        alert('Error al leer el archivo');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+        
+        function cerrarModal() {
+            document.getElementById('modal').style.display = 'none';
+            recetaEditando = null;
+        }
+        
+        // Inicializar
+        cargarDatos();
+    </script>
+</body>
+</html>
