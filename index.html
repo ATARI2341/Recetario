@@ -598,7 +598,7 @@
                     </div>
                     <div class="form-group">
                         <label><i class="fa-solid fa-video"></i> Enlace del video</label>
-                        <input type="text" id="urlVideo" placeholder="https://facebook.com/video/...">
+                        <input type="text" id="urlVideo" placeholder="">
                     </div>
                     <div class="form-group">
                         <label><i class="fas fa-tag"></i> Tipos de comida (puedes seleccionar varios)</label>
@@ -1202,7 +1202,7 @@
                 
                 tarjeta.innerHTML = `
                     <img class="tarjeta-imagen" src="${receta.imagen || 'https://us.123rf.com/450wm/arporn/arporn1504/arporn150400160/38743402-vector-de-la-cara-triste-dibujar-en-la-placa-blanca-con-la-cuchara-y-el-tenedor-sobre-fondo-azul.jpg?ver=6'}" 
-                         onerror="this.src='https://via.placeholder.com/400x200?text=🍳+Sin+imagen'">
+                         onerror="this.src=''">
                     <div class="tarjeta-contenido">
                         <div class="tarjeta-titulo">
                             <i class="fas fa-utensil-spoon"></i> ${receta.nombre}
