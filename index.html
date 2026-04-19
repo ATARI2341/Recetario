@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recetario</title>
+    <title>Recetario del corazón - Organizador por Pestañas</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Librerías para PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="icon" href="fav-icon.png" type="image/x-icon">
     <style>
         * {
@@ -25,7 +28,6 @@
             margin: 0 auto;
         }
 
-        /* Header */
         .header {
             background: white;
             border-radius: 20px;
@@ -42,7 +44,6 @@
             margin-bottom: 10px;
         }
 
-        /* Panel de categorías */
         .categorias-panel {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -97,7 +98,6 @@
             transform: scale(1.1);
         }
 
-        /* Editor */
         .formulario {
             background: white;
             padding: 25px;
@@ -135,7 +135,6 @@
             font-size: 14px;
         }
 
-        /* Multi-select en cuadrícula - MEJORADO */
         .multi-select-grid {
             border: 2px solid #e0e0e0;
             border-radius: 10px;
@@ -177,12 +176,6 @@
             font-weight: 500;
         }
 
-        .multi-select-option.selected {
-            background: #e3f2fd;
-            border-color: #667eea;
-        }
-
-        /* Editor toolbar */
         .editor-toolbar {
             background: #f8f9fa;
             border: 2px solid #e0e0e0;
@@ -217,7 +210,6 @@
             line-height: 1.6;
         }
 
-        /* Toolbar */
         .toolbar {
             background: white;
             border-radius: 15px;
@@ -260,8 +252,17 @@
             background: #6c757d;
             color: white;
         }
+        
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
 
-        /* Buscador */
         .buscador {
             background: white;
             border-radius: 15px;
@@ -284,7 +285,58 @@
             font-size: 16px;
         }
 
-        /* Filtros activos */
+        .tabs-container {
+            background: white;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .tabs-header {
+            display: flex;
+            flex-wrap: wrap;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e0e0e0;
+            gap: 5px;
+            padding: 10px 10px 0 10px;
+        }
+        
+        .tab-btn {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 10px 10px 0 0;
+            color: #666;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .tab-btn:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+        
+        .tab-btn.active {
+            background: white;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background: white;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+
         .filtros-activos {
             background: white;
             border-radius: 15px;
@@ -308,15 +360,13 @@
             gap: 8px;
         }
 
-        /* Grid de recetas */
         .recetas-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 25px;
-            margin-top: 30px;
+            margin-top: 20px;
         }
 
-        /* Tarjeta */
         .tarjeta {
             border-radius: 20px;
             overflow: hidden;
@@ -373,7 +423,6 @@
             margin: 15px 0;
             max-height: 100px;
             overflow: hidden;
-            position: relative;
         }
 
         .btn-accion {
@@ -397,7 +446,6 @@
             background: rgba(255,255,255,0.3);
         }
 
-        /* Modal de filtros */
         .modal {
             display: none;
             position: fixed;
@@ -445,12 +493,6 @@
         .filtro-item.selected {
             border-color: #333;
             transform: scale(1.02);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-
-        .filtro-item:hover {
-            transform: translateY(-2px);
-            filter: brightness(0.95);
         }
 
         .modal-header {
@@ -471,41 +513,17 @@
             border-top: 2px solid #e0e0e0;
         }
 
-        .modal-imagen {
-            width: 100%;
-            border-radius: 15px;
-            margin-bottom: 20px;
+        .sort-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            padding: 10px 20px 0 20px;
         }
-
-        .modal-titulo {
-            font-size: 1.8em;
-            margin-bottom: 20px;
-        }
-
-        .modal-descripcion {
-            line-height: 1.8;
-            margin: 20px 0;
-        }
-
-        .contenido-enriquecido h3 {
-            margin: 15px 0 10px 0;
-        }
-        .contenido-enriquecido ul, .contenido-enriquecido ol {
-            margin: 10px 0 10px 25px;
-        }
-        .contenido-enriquecido li {
-            margin: 5px 0;
-        }
-        .contenido-enriquecido .nota {
-            background: #fff3cd;
-            padding: 10px;
-            border-left: 4px solid #ffc107;
-            margin: 15px 0;
-        }
-        .contenido-enriquecido hr {
-            margin: 20px 0;
-            border: none;
-            height: 3px;
+        
+        .view-toggle {
+            margin-left: auto;
         }
 
         @media (max-width: 768px) {
@@ -522,54 +540,17 @@
                 grid-template-columns: repeat(2, 1fr);
             }
         }
-
-        @media (max-width: 480px) {
-            .filtros-grid {
-                grid-template-columns: 1fr;
-            }
-            .multi-select-grid {
-                grid-template-columns: 1fr;
-            }
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1><i class="fas fa-utensils"></i> Recetario Del corazón</h1>
+            <div style="display: flex; align-items: center; gap: 15px;">
                 <img id="btnPlay" src="./kirby full.ico" alt="pollo" style="cursor: pointer; width: 30px; height: 30px; border-radius: 10%; margin-top: 10px;">
                 <audio id="audio1" src="k1.mp3"></audio>
                 <audio id="audio2" src="k2.mp3"></audio>
-                <script>
-                const btn = document.getElementById("btnPlay");
-                const audio1 = document.getElementById("audio1");
-                const audio2 = document.getElementById("audio2");
-
-                let audioActual = 1;
-
-                btn.addEventListener("click", () => {
-                    audio2.volume = 0.6;
-                    if (audioActual === 2) {
-                        if (audio1.paused) {
-                            audio2.pause();
-                            audio1.play();
-                        } else {
-                            audio1.pause();
-                            audioActual = 1; // cambiar al siguiente audio
-                        }
-                    } else {
-                        audio1.volume = 0.6;
-                        if (audio2.paused) {
-                            audio1.pause();
-                            audio2.play();
-                        } else {
-                            audio2.pause();
-                            audioActual = 2; // regresar al primero
-                        }
-                    }
-
-                });
-                </script>
+            </div>
             <div class="categorias-panel">
                 <div class="categoria-box">
                     <h3><i class="fas fa-palette"></i> Tipos de comida</h3>
@@ -642,12 +623,12 @@
         </div>
 
         <div class="toolbar">
-            <button class="btn btn-primary" onclick="exportarRecetario()"><i class="fas fa-download"></i> Exportar completo</button>
-            <button class="btn btn-success" onclick="importarRecetario()"><i class="fas fa-upload"></i> Importar recetario</button>
+            <button class="btn btn-primary" onclick="exportarRecetario()"><i class="fas fa-download"></i> Exportar JSON</button>
+            <button class="btn btn-success" onclick="importarRecetario()"><i class="fas fa-upload"></i> Importar JSON</button>
+            <button class="btn btn-info" onclick="generarPDF()"><i class="fas fa-file-pdf"></i> Exportar a PDF</button>
             <button class="btn btn-danger" onclick="eliminarTodas()"><i class="fas fa-trash-alt"></i> Eliminar todas</button>
         </div>
 
-        <!-- Buscador -->
         <div class="buscador">
             <h3><i class="fas fa-search"></i> Buscador</h3>
             <div class="buscador-input">
@@ -657,7 +638,6 @@
             </div>
         </div>
 
-        <!-- Filtros activos -->
         <div class="filtros-activos">
             <h3><i class="fas fa-filter"></i> Filtros activos</h3>
             <div class="filtros-activos-tags" id="filtrosActivosTags">
@@ -668,24 +648,29 @@
             </button>
         </div>
 
-        <div class="recetas-grid" id="recetasGrid"></div>
+        <div class="tabs-container" id="tabsContainer">
+            <div class="sort-controls">
+                <button class="btn btn-info" onclick="cambiarOrden('asc')"><i class="fas fa-sort-alpha-down"></i> Orden A-Z</button>
+                <button class="btn btn-info" onclick="cambiarOrden('desc')"><i class="fas fa-sort-alpha-up"></i> Orden Z-A</button>
+                <button class="btn btn-warning view-toggle" id="toggleViewBtn" onclick="alternarVista()"><i class="fas fa-columns"></i> Vista unificada</button>
+            </div>
+            <div class="tabs-header" id="tabsHeader"></div>
+            <div id="tabsContent"></div>
+        </div>
+        
         <div id="estadisticas" style="background:white; border-radius:15px; padding:20px; margin-top:20px; text-align:center;"></div>
     </div>
 
-    <!-- Modal de filtros -->
     <div id="modalFiltros" class="modal">
         <div class="modal-contenido">
             <div class="modal-header">
                 <h2><i class="fas fa-filter"></i> Filtrar recetas</h2>
                 <i class="fas fa-times" onclick="cerrarModalFiltros()" style="font-size: 28px; cursor: pointer;"></i>
             </div>
-            
             <h3><i class="fas fa-tag"></i> Tipos de comida</h3>
             <div id="filtrosTiposGrid" class="filtros-grid"></div>
-            
             <h3 style="margin-top: 20px;"><i class="fas fa-flag"></i> Países</h3>
             <div id="filtrosPaisesGrid" class="filtros-grid"></div>
-            
             <div class="modal-actions">
                 <button class="btn btn-secondary" onclick="limpiarTodosFiltros()"><i class="fas fa-trash"></i> Limpiar todos</button>
                 <button class="btn btn-primary" onclick="aplicarFiltrosYCerrar()"><i class="fas fa-check"></i> Aplicar filtros</button>
@@ -693,7 +678,6 @@
         </div>
     </div>
 
-    <!-- Modal para ver receta -->
     <div id="modal" class="modal" onclick="cerrarModal(event)">
         <div class="modal-contenido" onclick="event.stopPropagation()">
             <span class="cerrar-modal" onclick="cerrarModal()" style="position:absolute; top:20px; right:25px; font-size:35px; cursor:pointer;">&times;</span>
@@ -715,12 +699,10 @@
         let recetas = [];
         let imagenSeleccionada = null;
         let recetaEditando = null;
+        let ordenActual = 'asc';
+        let vistaUnificada = false;
         
-        let filtrosSeleccionados = {
-            tipos: [],
-            paises: []
-        };
-        
+        let filtrosSeleccionados = { tipos: [], paises: [] };
         let busquedaActual = '';
         
         let categorias = {
@@ -740,6 +722,161 @@
         };
 
         let coloresSeparador = '#667eea';
+        
+        // Audio
+        const btn = document.getElementById("btnPlay");
+        const audio1 = document.getElementById("audio1");
+        const audio2 = document.getElementById("audio2");
+        let audioActual = 1;
+        if(btn) {
+            btn.addEventListener("click", () => {
+                audio2.volume = 0.6;
+                if (audioActual === 2) {
+                    if (audio1.paused) {
+                        audio2.pause();
+                        audio1.play();
+                    } else {
+                        audio1.pause();
+                        audioActual = 1;
+                    }
+                } else {
+                    audio1.volume = 0.6;
+                    if (audio2.paused) {
+                        audio1.pause();
+                        audio2.play();
+                    } else {
+                        audio2.pause();
+                        audioActual = 2;
+                    }
+                }
+            });
+        }
+
+        // Función para generar PDF
+        async function generarPDF() {
+            if(recetas.length === 0) {
+                alert('No hay recetas para exportar a PDF');
+                return;
+            }
+            
+            const loadingDiv = document.createElement('div');
+            loadingDiv.innerHTML = '<div style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:20px; border-radius:10px; z-index:9999; box-shadow:0 0 20px rgba(0,0,0,0.3);"><i class="fas fa-spinner fa-spin"></i> Generando PDF... Esto puede tomar unos segundos</div>';
+            document.body.appendChild(loadingDiv);
+            
+            try {
+                const pdfContainer = document.createElement('div');
+                pdfContainer.style.cssText = 'font-family: "Segoe UI", Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px; background: white; color: #333; line-height: 1.6;';
+                
+                const title = document.createElement('div');
+                title.style.cssText = 'text-align: center; margin-bottom: 40px; border-bottom: 3px solid #667eea; padding-bottom: 20px;';
+                title.innerHTML = `
+                    <h1 style="font-size: 32px; color: #667eea; margin-bottom: 10px;">📖 Recetario del corazón ❤️</h1>
+                    <p style="color: #666; font-size: 14px;">Recetas llenas de sabor y amor para compartir</p>
+                    <p style="color: #888; font-size: 12px; margin-top: 10px;">Generado: ${new Date().toLocaleDateString('es-ES')} - ${new Date().toLocaleTimeString('es-ES')}</p>
+                    <p style="color: #667eea; font-size: 13px; font-weight: bold;">📊 Total de recetas: ${recetas.length}</p>
+                `;
+                pdfContainer.appendChild(title);
+                
+                const recetasOrdenadas = [...recetas].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+                
+                recetasOrdenadas.forEach((receta, index) => {
+                    const recipeCard = document.createElement('div');
+                    recipeCard.style.cssText = 'margin-bottom: 35px; page-break-inside: avoid; break-inside: avoid; border: 1px solid #e0e0e0; border-radius: 15px; padding: 20px; background: #fafafa;';
+                    
+                    const primerTipo = receta.tipos && receta.tipos.length > 0 ? receta.tipos[0] : null;
+                    const colorTipo = primerTipo ? getColorPorTipo(primerTipo) : '#667eea';
+                    
+                    const recipeTitle = document.createElement('h2');
+                    recipeTitle.style.cssText = `font-size: 22px; color: ${colorTipo}; margin-bottom: 15px; border-left: 5px solid ${colorTipo}; padding-left: 15px;`;
+                    recipeTitle.innerHTML = `${index + 1}. ${escapeHtml(receta.nombre)}`;
+                    recipeCard.appendChild(recipeTitle);
+                    
+                    const categoriesDiv = document.createElement('div');
+                    categoriesDiv.style.cssText = 'margin: 15px 0;';
+                    
+                    if (receta.tipos && receta.tipos.length > 0) {
+                        const tiposHtml = receta.tipos.map(t => {
+                            const tipoData = categorias.tipos.find(ct => ct.nombre === t);
+                            return `<span style="background:${tipoData ? tipoData.color : '#667eea'}; color:${tipoData ? tipoData.textoColor : 'white'}; padding:4px 12px; border-radius:20px; font-size:11px; font-weight:600; display:inline-block; margin:2px;">${t}</span>`;
+                        }).join('');
+                        categoriesDiv.innerHTML += `<div style="margin-bottom:8px;"><strong>🏷️ Tipos:</strong> ${tiposHtml}</div>`;
+                    }
+                    
+                    if (receta.paises && receta.paises.length > 0) {
+                        const paisesHtml = receta.paises.map(p => {
+                            const paisData = categorias.paises.find(cp => cp.nombre === p);
+                            return `<span style="background:${paisData ? paisData.color : '#6c757d'}; color:${paisData ? paisData.textoColor : 'white'}; padding:4px 12px; border-radius:20px; font-size:11px; font-weight:600; display:inline-block; margin:2px;">${paisData ? paisData.bandera : '🏳️'} ${p}</span>`;
+                        }).join('');
+                        categoriesDiv.innerHTML += `<div><strong>🌍 Países:</strong> ${paisesHtml}</div>`;
+                    }
+                    recipeCard.appendChild(categoriesDiv);
+                    
+                    if (receta.video && receta.video.trim()) {
+                        const videoDiv = document.createElement('div');
+                        videoDiv.style.cssText = 'margin: 10px 0;';
+                        videoDiv.innerHTML = `<strong>🎬 Video:</strong> <a href="${receta.video}" style="color: #667eea;" target="_blank">Ver receta en video</a>`;
+                        recipeCard.appendChild(videoDiv);
+                    }
+                    
+                    const descripcionDiv = document.createElement('div');
+                    descripcionDiv.style.cssText = 'margin: 15px 0; line-height: 1.6; color: #444;';
+                    let descripcionHtml = receta.descripcion || '<p>Sin descripción</p>';
+                    descripcionHtml = descripcionHtml
+                        .replace(/<div class="nota">(.*?)<\/div>/gi, '<div style="background: #fff3cd; padding: 10px; border-left: 4px solid #ffc107; margin: 10px 0; border-radius: 5px;"><strong>📝 Nota:</strong> $1</div>')
+                        .replace(/<ul>/gi, '<ul style="margin: 10px 0 10px 25px;">')
+                        .replace(/<ol>/gi, '<ol style="margin: 10px 0 10px 25px;">')
+                        .replace(/<li>/gi, '<li style="margin: 5px 0;">')
+                        .replace(/<hr[^>]*>/gi, '<hr style="border: none; height: 2px; background: linear-gradient(90deg, #667eea, #764ba2); margin: 15px 0;">')
+                        .replace(/<h3>/gi, '<h3 style="color: #667eea; margin: 15px 0 10px 0;">');
+                    descripcionDiv.innerHTML = descripcionHtml;
+                    recipeCard.appendChild(descripcionDiv);
+                    pdfContainer.appendChild(recipeCard);
+                });
+                
+                const footer = document.createElement('div');
+                footer.style.cssText = 'text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #999;';
+                footer.innerHTML = `<p>Recetario del corazón - Un libro de recetas hecho con amor ❤️</p><p>© ${new Date().getFullYear()} - Todos los derechos reservados</p>`;
+                pdfContainer.appendChild(footer);
+                
+                pdfContainer.style.position = 'absolute';
+                pdfContainer.style.left = '-9999px';
+                pdfContainer.style.top = '0';
+                document.body.appendChild(pdfContainer);
+                
+                const canvas = await html2canvas(pdfContainer, { scale: 2.5, backgroundColor: '#ffffff', logging: false, useCORS: true });
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+                const imgWidth = 210;
+                const pageHeight = 297;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+                
+                pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+                while (heightLeft > 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+                
+                pdf.save(`Recetario_del_corazon_${new Date().toISOString().split('T')[0]}.pdf`);
+                document.body.removeChild(pdfContainer);
+                document.body.removeChild(loadingDiv);
+                alert('✅ PDF generado correctamente');
+            } catch (error) {
+                console.error(error);
+                if(document.body.contains(loadingDiv)) document.body.removeChild(loadingDiv);
+                alert('Error al generar PDF');
+            }
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
 
         function cargarDatos() {
             const guardado = localStorage.getItem('recetario_multicat_v3');
@@ -751,591 +888,302 @@
             }
             actualizarSelectores();
             actualizarMultiSelectores();
-            mostrarRecetas();
+            renderizarPestanas();
             actualizarFiltrosActivosUI();
         }
 
         function guardarDatos() {
-            localStorage.setItem('recetario_multicat_v3', JSON.stringify({
-                recetas: recetas,
-                categorias: categorias,
-                coloresSeparador: coloresSeparador
-            }));
+            localStorage.setItem('recetario_multicat_v3', JSON.stringify({ recetas, categorias, coloresSeparador }));
+        }
+        
+        function alternarVista() {
+            vistaUnificada = !vistaUnificada;
+            const toggleBtn = document.getElementById('toggleViewBtn');
+            toggleBtn.innerHTML = vistaUnificada ? '<i class="fas fa-tags"></i> Vista por pestañas' : '<i class="fas fa-columns"></i> Vista unificada';
+            renderizarPestanas();
+        }
+        
+        function cambiarOrden(orden) {
+            ordenActual = orden;
+            renderizarPestanas();
+        }
+
+        function ordenarRecetas(recetasArray) {
+            return [...recetasArray].sort((a, b) => ordenActual === 'asc' ? a.nombre.localeCompare(b.nombre, 'es') : b.nombre.localeCompare(a.nombre, 'es'));
+        }
+
+        function obtenerRecetasFiltradas() {
+            let recetasFiltradas = [...recetas];
+            if (busquedaActual) recetasFiltradas = recetasFiltradas.filter(r => r.nombre.toLowerCase().includes(busquedaActual) || (r.descripcion && r.descripcion.toLowerCase().includes(busquedaActual)));
+            if (filtrosSeleccionados.tipos.length > 0) recetasFiltradas = recetasFiltradas.filter(r => r.tipos && r.tipos.some(t => filtrosSeleccionados.tipos.includes(t)));
+            if (filtrosSeleccionados.paises.length > 0) recetasFiltradas = recetasFiltradas.filter(r => r.paises && r.paises.some(p => filtrosSeleccionados.paises.includes(p)));
+            return ordenarRecetas(recetasFiltradas);
+        }
+        
+        function obtenerRecetasPorTipo(tipoNombre) {
+            return obtenerRecetasFiltradas().filter(receta => receta.tipos && receta.tipos.includes(tipoNombre));
+        }
+        
+        function renderizarVistaUnificada() {
+            const recetasFiltradas = obtenerRecetasFiltradas();
+            document.getElementById('tabsHeader').innerHTML = `<button class="tab-btn active"><i class="fas fa-list"></i> Todas las recetas <span style="background:#667eea; color:white; padding:2px 8px; border-radius:20px; margin-left:5px;">${recetasFiltradas.length}</span></button>`;
+            document.getElementById('tabsContent').innerHTML = `<div id="tab-unificada" class="tab-content active"><div class="recetas-grid" id="grid-unificada"></div></div>`;
+            const gridContainer = document.getElementById('grid-unificada');
+            if(recetasFiltradas.length === 0) gridContainer.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px;"><i class="fas fa-utensils fa-3x"></i><p>No hay recetas</p></div>';
+            else recetasFiltradas.forEach(receta => gridContainer.appendChild(crearTarjetaReceta(receta)));
+            document.getElementById('estadisticas').innerHTML = `<i class="fas fa-chart-bar"></i> Total: ${recetas.length} | Mostrando: ${recetasFiltradas.length} | Orden: ${ordenActual === 'asc' ? 'A-Z' : 'Z-A'}`;
+        }
+        
+        function renderizarVistaPestanas() {
+            const recetasFiltradas = obtenerRecetasFiltradas();
+            let tiposValidos = [{ nombre: 'Todas las recetas', color: '#667eea', textoColor: '#ffffff' }];
+            categorias.tipos.forEach(tipo => { if(obtenerRecetasPorTipo(tipo.nombre).length > 0) tiposValidos.push(tipo); });
+            if(tiposValidos.length === 1 && recetasFiltradas.length === 0) {
+                document.getElementById('tabsHeader').innerHTML = '<div style="padding:15px; text-align:center; color:#999;">No hay recetas</div>';
+                document.getElementById('tabsContent').innerHTML = '';
+                return;
+            }
+            let headerHtml = '', contentHtml = '';
+            tiposValidos.forEach((tipo, index) => {
+                const recetasTipo = tipo.nombre === 'Todas las recetas' ? recetasFiltradas : obtenerRecetasPorTipo(tipo.nombre);
+                const activeClass = index === 0 ? 'active' : '';
+                const bgColor = tipo.nombre === 'Todas las recetas' ? '#667eea' : tipo.color;
+                headerHtml += `<button class="tab-btn ${activeClass}" onclick="activarPestana(${index})" style="background:${bgColor}20;"><i class="fas ${tipo.nombre === 'Todas las recetas' ? 'fa-list' : 'fa-tag'}"></i> ${tipo.nombre} <span style="background:${bgColor}; padding:2px 8px; border-radius:20px;">${recetasTipo.length}</span></button>`;
+                contentHtml += `<div id="tab-${index}" class="tab-content ${activeClass}"><div class="recetas-grid" id="grid-tipo-${index}"></div></div>`;
+            });
+            document.getElementById('tabsHeader').innerHTML = headerHtml;
+            document.getElementById('tabsContent').innerHTML = contentHtml;
+            tiposValidos.forEach((tipo, index) => {
+                const recetasTipo = tipo.nombre === 'Todas las recetas' ? recetasFiltradas : obtenerRecetasPorTipo(tipo.nombre);
+                const gridContainer = document.getElementById(`grid-tipo-${index}`);
+                if(gridContainer) {
+                    gridContainer.innerHTML = '';
+                    if(recetasTipo.length === 0) gridContainer.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px;"><i class="fas fa-utensils fa-3x"></i><p>No hay recetas</p></div>';
+                    else recetasTipo.forEach(receta => gridContainer.appendChild(crearTarjetaReceta(receta)));
+                }
+            });
+            document.getElementById('estadisticas').innerHTML = `<i class="fas fa-chart-bar"></i> Total: ${recetas.length} | Mostrando: ${recetasFiltradas.length} | Orden: ${ordenActual === 'asc' ? 'A-Z' : 'Z-A'}`;
+        }
+        
+        function renderizarPestanas() { vistaUnificada ? renderizarVistaUnificada() : renderizarVistaPestanas(); }
+        
+        function activarPestana(index) {
+            document.querySelectorAll('.tab-btn').forEach((btn, i) => i === index ? btn.classList.add('active') : btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach((content, i) => i === index ? content.classList.add('active') : content.classList.remove('active'));
+        }
+        
+        function crearTarjetaReceta(receta) {
+            const primerTipo = receta.tipos && receta.tipos.length > 0 ? receta.tipos[0] : null;
+            const colorFondo = primerTipo ? getColorPorTipo(primerTipo) : '#667eea';
+            const colorTexto = primerTipo ? getTextoColorPorTipo(primerTipo) : '#ffffff';
+            const tarjeta = document.createElement('div');
+            tarjeta.className = 'tarjeta';
+            tarjeta.style.background = colorFondo;
+            tarjeta.style.color = colorTexto;
+            let descripcionPreview = receta.descripcion ? receta.descripcion.replace(/<[^>]*>/g, '').substring(0, 100) : 'Sin descripción';
+            const tiposHtml = (receta.tipos || []).map(t => `<span class="badge-categoria" style="background:rgba(255,255,255,0.3);"><i class="fas fa-tag"></i> ${t}</span>`).join('');
+            const paisesHtml = (receta.paises || []).map(p => `<span class="badge-categoria" style="background:rgba(255,255,255,0.3);"><i class="fas fa-flag"></i> ${getBanderaPorPais(p)} ${p}</span>`).join('');
+            tarjeta.innerHTML = `<img class="tarjeta-imagen" src="${receta.imagen || 'https://cdnx.jumpseller.com/japan-market-chile/image/20099393/plato_kirby_cafe_1.jpg?1645220294'}" onerror="this.src='https://cdnx.jumpseller.com/japan-market-chile/image/20099393/plato_kirby_cafe_1.jpg?1645220294'"><div class="tarjeta-contenido"><div class="tarjeta-titulo"><i class="fas fa-utensil-spoon"></i> ${receta.nombre}</div><div class="categorias-marcadores">${tiposHtml}${paisesHtml}</div><div class="tarjeta-descripcion">${descripcionPreview}</div><button class="btn-accion" onclick="verReceta(${receta.id})" style="background:rgba(255,255,255,0.2);"><i class="fas fa-eye"></i> Ver detalles</button><button class="btn-accion" onclick="editarReceta(${receta.id})" style="background:rgba(255,255,255,0.2);"><i class="fas fa-edit"></i> Editar</button><button class="btn-accion" onclick="eliminarReceta(${receta.id})" style="background:rgba(255,0,0,0.3);"><i class="fas fa-trash"></i> Eliminar</button></div>`;
+            return tarjeta;
         }
 
         function actualizarSelectores() {
-            const tiposContainer = document.getElementById('tiposContainer');
-            tiposContainer.innerHTML = categorias.tipos.map((t, i) => `
-                <div class="categoria-tag" style="background:${t.color}; color:${t.textoColor};">
-                    ${t.nombre}
-                    <div class="color-picker-group">
-                        <input type="color" value="${t.color}" onchange="cambiarColorTipo(${i}, this.value, 'color')" class="color-picker-btn" title="Color de fondo">
-                        <input type="color" value="${t.textoColor}" onchange="cambiarColorTipo(${i}, this.value, 'textoColor')" class="color-picker-btn" title="Color del texto">
-                    </div>
-                    <i class="fas fa-times" onclick="eliminarCategoria('tipo','${t.nombre}')" style="cursor:pointer;"></i>
-                </div>
-            `).join('');
-            
-            const paisesContainer = document.getElementById('paisesContainer');
-            paisesContainer.innerHTML = categorias.paises.map((p, i) => `
-                <div class="categoria-tag" style="background:${p.color}; color:${p.textoColor || '#ffffff'};">
-                    ${p.nombre}
-                    <div class="color-picker-group">
-                        <input type="color" value="${p.color}" onchange="cambiarColorPais(${i}, this.value, 'color')" class="color-picker-btn" title="Color de fondo">
-                        <input type="color" value="${p.textoColor || '#ffffff'}" onchange="cambiarColorPais(${i}, this.value, 'textoColor')" class="color-picker-btn" title="Color del texto">
-                    </div>
-                    <i class="fas fa-times" onclick="eliminarCategoria('pais','${p.nombre}')" style="cursor:pointer;"></i>
-                </div>
-            `).join('');
+            document.getElementById('tiposContainer').innerHTML = categorias.tipos.map((t, i) => `<div class="categoria-tag" style="background:${t.color}; color:${t.textoColor};">${t.nombre}<div class="color-picker-group"><input type="color" value="${t.color}" onchange="cambiarColorTipo(${i}, this.value, 'color')" class="color-picker-btn"><input type="color" value="${t.textoColor}" onchange="cambiarColorTipo(${i}, this.value, 'textoColor')" class="color-picker-btn"></div><i class="fas fa-times" onclick="eliminarCategoria('tipo','${t.nombre}')" style="cursor:pointer;"></i></div>`).join('');
+            document.getElementById('paisesContainer').innerHTML = categorias.paises.map((p, i) => `<div class="categoria-tag" style="background:${p.color}; color:${p.textoColor || '#ffffff'};">${p.nombre}<div class="color-picker-group"><input type="color" value="${p.color}" onchange="cambiarColorPais(${i}, this.value, 'color')" class="color-picker-btn"><input type="color" value="${p.textoColor || '#ffffff'}" onchange="cambiarColorPais(${i}, this.value, 'textoColor')" class="color-picker-btn"></div><i class="fas fa-times" onclick="eliminarCategoria('pais','${p.nombre}')" style="cursor:pointer;"></i></div>`).join('');
         }
 
         function actualizarMultiSelectores() {
-            const multiTipo = document.getElementById('multiTipo');
-            const multiPais = document.getElementById('multiPais');
-            
-            multiTipo.innerHTML = categorias.tipos.map(t => `
-                <label class="multi-select-option" style="background:${t.color}20; border-left: 4px solid ${t.color};">
-                    <input type="checkbox" value="${t.nombre}" style="width: auto;">
-                    <span style="background:${t.color}; color:${t.textoColor}; padding:4px 10px; border-radius:15px; display:inline-block;">${t.nombre}</span>
-                </label>
-            `).join('');
-            
-            multiPais.innerHTML = categorias.paises.map(p => `
-                <label class="multi-select-option" style="background:${p.color}20; border-left: 4px solid ${p.color};">
-                    <input type="checkbox" value="${p.nombre}" style="width: auto;">
-                    <span style="background:${p.color}; color:${p.textoColor || '#ffffff'}; padding:4px 10px; border-radius:15px; display:inline-block;">${p.bandera} ${p.nombre}</span>
-                </label>
-            `).join('');
+            document.getElementById('multiTipo').innerHTML = categorias.tipos.map(t => `<label class="multi-select-option" style="background:${t.color}20;"><input type="checkbox" value="${t.nombre}"><span style="background:${t.color}; color:${t.textoColor}; padding:4px 10px; border-radius:15px;">${t.nombre}</span></label>`).join('');
+            document.getElementById('multiPais').innerHTML = categorias.paises.map(p => `<label class="multi-select-option" style="background:${p.color}20;"><input type="checkbox" value="${p.nombre}"><span style="background:${p.color}; color:${p.textoColor || '#ffffff'}; padding:4px 10px; border-radius:15px;">${p.bandera} ${p.nombre}</span></label>`).join('');
         }
 
         function getSelectedMultiValues(containerId) {
-            const container = document.getElementById(containerId);
-            const checkboxes = container.querySelectorAll('input[type="checkbox"]:checked');
-            return Array.from(checkboxes).map(cb => cb.value);
+            return Array.from(document.querySelectorAll(`#${containerId} input:checked`)).map(cb => cb.value);
         }
 
         function setSelectedMultiValues(containerId, values) {
-            const container = document.getElementById(containerId);
-            const checkboxes = container.querySelectorAll('input[type="checkbox"]');
-            checkboxes.forEach(cb => {
-                cb.checked = values.includes(cb.value);
-            });
+            document.querySelectorAll(`#${containerId} input`).forEach(cb => cb.checked = values.includes(cb.value));
         }
 
-        function cambiarColorTipo(index, nuevoColor, propiedad) {
-            categorias.tipos[index][propiedad] = nuevoColor;
-            guardarDatos();
-            mostrarRecetas();
-            actualizarSelectores();
-            actualizarMultiSelectores();
-            actualizarModalFiltros();
-        }
-
-        function cambiarColorPais(index, nuevoColor, propiedad) {
-            categorias.paises[index][propiedad] = nuevoColor;
-            guardarDatos();
-            mostrarRecetas();
-            actualizarSelectores();
-            actualizarMultiSelectores();
-            actualizarModalFiltros();
-        }
-
+        function cambiarColorTipo(index, nuevoColor, propiedad) { categorias.tipos[index][propiedad] = nuevoColor; guardarDatos(); renderizarPestanas(); actualizarSelectores(); actualizarMultiSelectores(); actualizarModalFiltros(); }
+        function cambiarColorPais(index, nuevoColor, propiedad) { categorias.paises[index][propiedad] = nuevoColor; guardarDatos(); renderizarPestanas(); actualizarSelectores(); actualizarMultiSelectores(); actualizarModalFiltros(); }
+        
         function agregarCategoria(tipo) {
             if (tipo === 'tipo') {
                 let nuevoNombre = document.getElementById('nuevoTipo').value.trim();
                 if (nuevoNombre && !categorias.tipos.find(t => t.nombre === nuevoNombre)) {
-                    categorias.tipos.push({ 
-                        nombre: nuevoNombre, 
-                        color: '#' + Math.floor(Math.random()*16777215).toString(16),
-                        textoColor: '#ffffff'
-                    });
+                    categorias.tipos.push({ nombre: nuevoNombre, color: '#' + Math.floor(Math.random()*16777215).toString(16), textoColor: '#ffffff' });
                     document.getElementById('nuevoTipo').value = '';
                 }
             } else {
                 let nuevoNombre = document.getElementById('nuevoPais').value.trim();
                 if (nuevoNombre && !categorias.paises.find(p => p.nombre === nuevoNombre)) {
-                    categorias.paises.push({ 
-                        nombre: nuevoNombre, 
-                        bandera: '🏳️',
-                        color: '#' + Math.floor(Math.random()*16777215).toString(16),
-                        textoColor: '#ffffff'
-                    });
+                    categorias.paises.push({ nombre: nuevoNombre, bandera: '🏳️', color: '#' + Math.floor(Math.random()*16777215).toString(16), textoColor: '#ffffff' });
                     document.getElementById('nuevoPais').value = '';
                 }
             }
-            actualizarSelectores();
-            actualizarMultiSelectores();
-            actualizarModalFiltros();
-            guardarDatos();
+            actualizarSelectores(); actualizarMultiSelectores(); actualizarModalFiltros(); guardarDatos(); renderizarPestanas();
         }
 
         function eliminarCategoria(tipo, valor) {
             if (confirm(`¿Eliminar "${valor}"?`)) {
                 if (tipo === 'tipo') {
                     categorias.tipos = categorias.tipos.filter(t => t.nombre !== valor);
-                    recetas.forEach(r => { 
-                        if (r.tipos) r.tipos = r.tipos.filter(t => t !== valor);
-                    });
+                    recetas.forEach(r => { if (r.tipos) r.tipos = r.tipos.filter(t => t !== valor); });
                     filtrosSeleccionados.tipos = filtrosSeleccionados.tipos.filter(t => t !== valor);
                 } else {
                     categorias.paises = categorias.paises.filter(p => p.nombre !== valor);
-                    recetas.forEach(r => { 
-                        if (r.paises) r.paises = r.paises.filter(p => p !== valor);
-                    });
+                    recetas.forEach(r => { if (r.paises) r.paises = r.paises.filter(p => p !== valor); });
                     filtrosSeleccionados.paises = filtrosSeleccionados.paises.filter(p => p !== valor);
                 }
-                actualizarSelectores();
-                actualizarMultiSelectores();
-                actualizarModalFiltros();
-                actualizarFiltrosActivosUI();
-                guardarDatos();
-                mostrarRecetas();
+                actualizarSelectores(); actualizarMultiSelectores(); actualizarModalFiltros(); actualizarFiltrosActivosUI(); guardarDatos(); renderizarPestanas();
             }
         }
 
-        function getColorPorTipo(tipoNombre) {
-            const tipo = categorias.tipos.find(t => t.nombre === tipoNombre);
-            return tipo ? tipo.color : '#667eea';
-        }
+        function getColorPorTipo(tipoNombre) { const tipo = categorias.tipos.find(t => t.nombre === tipoNombre); return tipo ? tipo.color : '#667eea'; }
+        function getTextoColorPorTipo(tipoNombre) { const tipo = categorias.tipos.find(t => t.nombre === tipoNombre); return tipo ? tipo.textoColor : '#ffffff'; }
+        function getBanderaPorPais(paisNombre) { const pais = categorias.paises.find(p => p.nombre === paisNombre); return pais ? pais.bandera : '🏳️'; }
 
-        function getTextoColorPorTipo(tipoNombre) {
-            const tipo = categorias.tipos.find(t => t.nombre === tipoNombre);
-            return tipo ? tipo.textoColor : '#ffffff';
-        }
-
-        function getBanderaPorPais(paisNombre) {
-            const pais = categorias.paises.find(p => p.nombre === paisNombre);
-            return pais ? pais.bandera : '🏳️';
-        }
-
-        // Editor funciones
-        function formatoTexto(comando) {
-            document.execCommand(comando, false, null);
-            document.getElementById('editorContenido').focus();
-        }
-
-        function insertarLista(tipo) {
-            document.execCommand(`insert${tipo === 'ul' ? 'UnorderedList' : 'OrderedList'}`, false, null);
-        }
-
-        function insertarSeparador() {
-            const color = prompt('Color del separador (ej: #ff6b6b, rojo, azul):', coloresSeparador);
-            if (color) {
-                coloresSeparador = color;
-                const separador = `<hr style="border:none; height:3px; background:${color}; margin:20px 0;">`;
-                document.execCommand('insertHTML', false, separador);
-            }
-        }
-
-        function insertarIcono() {
-            const iconos = ['🍳', '🥘', '🍝', '🥗', '🍰', '🍪', '🥑', '🌮', '🍜', '🍛'];
-            const icono = prompt('Elige un icono:\n' + iconos.join(' '), '🍳');
-            if (icono) document.execCommand('insertHTML', false, ` ${icono} `);
-        }
-
-        function insertarNota() {
-            const nota = prompt('Escribe tu nota:', '✨ Consejo:');
-            if (nota) {
-                document.execCommand('insertHTML', false, `<div class="nota"><i class="fas fa-lightbulb"></i> <strong>📝 Nota:</strong> ${nota}</div>`);
-            }
-        }
-
+        function formatoTexto(comando) { document.execCommand(comando, false, null); document.getElementById('editorContenido').focus(); }
+        function insertarLista(tipo) { document.execCommand(`insert${tipo === 'ul' ? 'UnorderedList' : 'OrderedList'}`, false, null); }
+        function insertarSeparador() { const color = prompt('Color del separador:', coloresSeparador); if(color) { coloresSeparador = color; document.execCommand('insertHTML', false, `<hr style="border:none; height:3px; background:${color}; margin:20px 0;">`); } }
+        function insertarIcono() { const icono = prompt('Elige un icono:', '🍳'); if(icono) document.execCommand('insertHTML', false, ` ${icono} `); }
+        function insertarNota() { const nota = prompt('Escribe tu nota:', '✨ Consejo:'); if(nota) document.execCommand('insertHTML', false, `<div class="nota"><i class="fas fa-lightbulb"></i> <strong>📝 Nota:</strong> ${nota}</div>`); }
+        
         function previewImagen(input) {
-            if (input.files && input.files[0]) {
+            if(input.files && input.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    imagenSeleccionada = e.target.result;
-                    document.getElementById('previewImg').src = imagenSeleccionada;
-                    document.getElementById('imagenPreview').style.display = 'block';
-                };
+                reader.onload = e => { imagenSeleccionada = e.target.result; document.getElementById('previewImg').src = imagenSeleccionada; document.getElementById('imagenPreview').style.display = 'block'; };
                 reader.readAsDataURL(input.files[0]);
             }
         }
-
-        function eliminarImagenSeleccionada() {
-            imagenSeleccionada = null;
-            document.getElementById('imagenPreview').style.display = 'none';
-            document.getElementById('inputImagen').value = '';
-        }
-
+        function eliminarImagenSeleccionada() { imagenSeleccionada = null; document.getElementById('imagenPreview').style.display = 'none'; document.getElementById('inputImagen').value = ''; }
+        
         function guardarReceta() {
             const nombre = document.getElementById('nombreReceta').value.trim();
             const editandoId = document.getElementById('editandoId').value;
-            
-            if (!nombre) {
-                alert('Escribe el nombre de la receta');
-                return;
-            }
-            
-            const tiposSeleccionados = getSelectedMultiValues('multiTipo');
-            const paisesSeleccionados = getSelectedMultiValues('multiPais');
-            
-            const recetaData = {
-                id: editandoId ? parseInt(editandoId) : Date.now(),
-                nombre: nombre,
-                descripcion: document.getElementById('editorContenido').innerHTML,
-                tipos: tiposSeleccionados,
-                paises: paisesSeleccionados,
-                video: document.getElementById('urlVideo').value,
-                imagen: imagenSeleccionada || '',
-                fecha: new Date().toISOString()
-            };
-            
-            if (editandoId) {
-                const index = recetas.findIndex(r => r.id == editandoId);
-                if (index !== -1) {
-                    recetas[index] = recetaData;
-                }
-                cancelarEdicion();
-            } else {
-                recetas.push(recetaData);
-            }
-            
-            guardarDatos();
-            mostrarRecetas();
-            limpiarFormulario();
-            alert(editandoId ? '✅ Receta actualizada' : '✅ Receta guardada');
+            if(!nombre) { alert('Escribe el nombre'); return; }
+            const recetaData = { id: editandoId ? parseInt(editandoId) : Date.now(), nombre: nombre, descripcion: document.getElementById('editorContenido').innerHTML, tipos: getSelectedMultiValues('multiTipo'), paises: getSelectedMultiValues('multiPais'), video: document.getElementById('urlVideo').value, imagen: imagenSeleccionada || '', fecha: new Date().toISOString() };
+            if(editandoId) { const index = recetas.findIndex(r => r.id == editandoId); if(index !== -1) recetas[index] = recetaData; cancelarEdicion(); }
+            else recetas.push(recetaData);
+            guardarDatos(); renderizarPestanas(); limpiarFormulario(); alert(editandoId ? '✅ Actualizada' : '✅ Guardada');
         }
-
+        
         function limpiarFormulario() {
             document.getElementById('nombreReceta').value = '';
             document.getElementById('editorContenido').innerHTML = '';
             document.getElementById('urlVideo').value = '';
             document.getElementById('editandoId').value = '';
             eliminarImagenSeleccionada();
-            
-            const checkboxes = document.querySelectorAll('#multiTipo input, #multiPais input');
-            checkboxes.forEach(cb => cb.checked = false);
+            document.querySelectorAll('#multiTipo input, #multiPais input').forEach(cb => cb.checked = false);
         }
-
-        function cancelarEdicion() {
-            limpiarFormulario();
-            document.getElementById('btnCancelarEdicion').style.display = 'none';
-        }
-
+        
+        function cancelarEdicion() { limpiarFormulario(); document.getElementById('btnCancelarEdicion').style.display = 'none'; }
+        
         function editarReceta(id) {
             const receta = recetas.find(r => r.id === id);
-            if (!receta) return;
-            
+            if(!receta) return;
             document.getElementById('nombreReceta').value = receta.nombre;
             document.getElementById('editorContenido').innerHTML = receta.descripcion || '';
             document.getElementById('urlVideo').value = receta.video || '';
             document.getElementById('editandoId').value = receta.id;
             document.getElementById('btnCancelarEdicion').style.display = 'inline-block';
-            
             setSelectedMultiValues('multiTipo', receta.tipos || []);
             setSelectedMultiValues('multiPais', receta.paises || []);
-            
-            if (receta.imagen) {
-                imagenSeleccionada = receta.imagen;
-                document.getElementById('previewImg').src = receta.imagen;
-                document.getElementById('imagenPreview').style.display = 'block';
-            }
-            
+            if(receta.imagen) { imagenSeleccionada = receta.imagen; document.getElementById('previewImg').src = receta.imagen; document.getElementById('imagenPreview').style.display = 'block'; }
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-
-        function aplicarFiltros() {
-            busquedaActual = document.getElementById('buscadorTexto').value.toLowerCase();
-            mostrarRecetas();
-        }
-
-        function limpiarBuscador() {
-            document.getElementById('buscadorTexto').value = '';
-            busquedaActual = '';
-            mostrarRecetas();
-        }
-
-        function abrirModalFiltros() {
-            actualizarModalFiltros();
-            document.getElementById('modalFiltros').style.display = 'flex';
-        }
-
+        
+        function aplicarFiltros() { busquedaActual = document.getElementById('buscadorTexto').value.toLowerCase(); renderizarPestanas(); }
+        function limpiarBuscador() { document.getElementById('buscadorTexto').value = ''; busquedaActual = ''; renderizarPestanas(); }
+        function abrirModalFiltros() { actualizarModalFiltros(); document.getElementById('modalFiltros').style.display = 'flex'; }
+        
         function actualizarModalFiltros() {
-            const tiposGrid = document.getElementById('filtrosTiposGrid');
-            const paisesGrid = document.getElementById('filtrosPaisesGrid');
-            
-            tiposGrid.innerHTML = categorias.tipos.map(t => `
-                <div class="filtro-item ${filtrosSeleccionados.tipos.includes(t.nombre) ? 'selected' : ''}"
-                     style="background:${t.color}; color:${t.textoColor};"
-                     onclick="toggleFiltroTipo('${t.nombre}')">
-                    ${t.nombre}
-                </div>
-            `).join('');
-            
-            paisesGrid.innerHTML = categorias.paises.map(p => `
-                <div class="filtro-item ${filtrosSeleccionados.paises.includes(p.nombre) ? 'selected' : ''}"
-                     style="background:${p.color}; color:${p.textoColor || '#ffffff'};"
-                     onclick="toggleFiltroPais('${p.nombre}')">
-                    ${p.bandera} ${p.nombre}
-                </div>
-            `).join('');
+            document.getElementById('filtrosTiposGrid').innerHTML = categorias.tipos.map(t => `<div class="filtro-item ${filtrosSeleccionados.tipos.includes(t.nombre) ? 'selected' : ''}" style="background:${t.color}; color:${t.textoColor};" onclick="toggleFiltroTipo('${t.nombre}')">${t.nombre}</div>`).join('');
+            document.getElementById('filtrosPaisesGrid').innerHTML = categorias.paises.map(p => `<div class="filtro-item ${filtrosSeleccionados.paises.includes(p.nombre) ? 'selected' : ''}" style="background:${p.color}; color:${p.textoColor || '#ffffff'};" onclick="toggleFiltroPais('${p.nombre}')">${p.bandera} ${p.nombre}</div>`).join('');
         }
-
-        function toggleFiltroTipo(tipo) {
-            const index = filtrosSeleccionados.tipos.indexOf(tipo);
-            if (index === -1) {
-                filtrosSeleccionados.tipos.push(tipo);
-            } else {
-                filtrosSeleccionados.tipos.splice(index, 1);
-            }
-            actualizarModalFiltros();
-        }
-
-        function toggleFiltroPais(pais) {
-            const index = filtrosSeleccionados.paises.indexOf(pais);
-            if (index === -1) {
-                filtrosSeleccionados.paises.push(pais);
-            } else {
-                filtrosSeleccionados.paises.splice(index, 1);
-            }
-            actualizarModalFiltros();
-        }
-
-        function limpiarTodosFiltros() {
-            filtrosSeleccionados.tipos = [];
-            filtrosSeleccionados.paises = [];
-            actualizarModalFiltros();
-        }
-
-        function aplicarFiltrosYCerrar() {
-            cerrarModalFiltros();
-            actualizarFiltrosActivosUI();
-            mostrarRecetas();
-        }
-
-        function cerrarModalFiltros() {
-            document.getElementById('modalFiltros').style.display = 'none';
-        }
-
+        
+        function toggleFiltroTipo(tipo) { const index = filtrosSeleccionados.tipos.indexOf(tipo); index === -1 ? filtrosSeleccionados.tipos.push(tipo) : filtrosSeleccionados.tipos.splice(index, 1); actualizarModalFiltros(); }
+        function toggleFiltroPais(pais) { const index = filtrosSeleccionados.paises.indexOf(pais); index === -1 ? filtrosSeleccionados.paises.push(pais) : filtrosSeleccionados.paises.splice(index, 1); actualizarModalFiltros(); }
+        function limpiarTodosFiltros() { filtrosSeleccionados.tipos = []; filtrosSeleccionados.paises = []; actualizarModalFiltros(); }
+        function aplicarFiltrosYCerrar() { cerrarModalFiltros(); actualizarFiltrosActivosUI(); renderizarPestanas(); }
+        function cerrarModalFiltros() { document.getElementById('modalFiltros').style.display = 'none'; }
+        
         function actualizarFiltrosActivosUI() {
             const container = document.getElementById('filtrosActivosTags');
-            const totalFiltros = filtrosSeleccionados.tipos.length + filtrosSeleccionados.paises.length;
-            
-            if (totalFiltros === 0) {
-                container.innerHTML = '<span style="color:#999;">No hay filtros activos</span>';
-                return;
-            }
-            
+            if(filtrosSeleccionados.tipos.length === 0 && filtrosSeleccionados.paises.length === 0) { container.innerHTML = '<span style="color:#999;">No hay filtros activos</span>'; return; }
             let html = '';
-            filtrosSeleccionados.tipos.forEach(t => {
-                const tipo = categorias.tipos.find(ct => ct.nombre === t);
-                html += `<div class="filtro-activo-tag" style="background:${tipo.color}; color:${tipo.textoColor};">
-                            <i class="fas fa-tag"></i> ${t}
-                            <i class="fas fa-times-circle" onclick="eliminarFiltroTipo('${t}')" style="cursor:pointer;"></i>
-                        </div>`;
-            });
-            filtrosSeleccionados.paises.forEach(p => {
-                const pais = categorias.paises.find(cp => cp.nombre === p);
-                html += `<div class="filtro-activo-tag" style="background:${pais.color}; color:${pais.textoColor || '#ffffff'};">
-                            <i class="fas fa-flag"></i> ${pais.bandera} ${p}
-                            <i class="fas fa-times-circle" onclick="eliminarFiltroPais('${p}')" style="cursor:pointer;"></i>
-                        </div>`;
-            });
+            filtrosSeleccionados.tipos.forEach(t => { const tipo = categorias.tipos.find(ct => ct.nombre === t); html += `<div class="filtro-activo-tag" style="background:${tipo.color}; color:${tipo.textoColor};"><i class="fas fa-tag"></i> ${t}<i class="fas fa-times-circle" onclick="eliminarFiltroTipo('${t}')" style="cursor:pointer;"></i></div>`; });
+            filtrosSeleccionados.paises.forEach(p => { const pais = categorias.paises.find(cp => cp.nombre === p); html += `<div class="filtro-activo-tag" style="background:${pais.color}; color:${pais.textoColor || '#ffffff'};"><i class="fas fa-flag"></i> ${pais.bandera} ${p}<i class="fas fa-times-circle" onclick="eliminarFiltroPais('${p}')" style="cursor:pointer;"></i></div>`; });
             container.innerHTML = html;
         }
-
-        function eliminarFiltroTipo(tipo) {
-            filtrosSeleccionados.tipos = filtrosSeleccionados.tipos.filter(t => t !== tipo);
-            actualizarFiltrosActivosUI();
-            actualizarModalFiltros();
-            mostrarRecetas();
-        }
-
-        function eliminarFiltroPais(pais) {
-            filtrosSeleccionados.paises = filtrosSeleccionados.paises.filter(p => p !== pais);
-            actualizarFiltrosActivosUI();
-            actualizarModalFiltros();
-            mostrarRecetas();
-        }
-
-        function mostrarRecetas() {
-            let recetasFiltradas = [...recetas];
-            
-            if (busquedaActual) {
-                recetasFiltradas = recetasFiltradas.filter(r => 
-                    r.nombre.toLowerCase().includes(busquedaActual) ||
-                    (r.descripcion && r.descripcion.toLowerCase().includes(busquedaActual))
-                );
-            }
-            
-            if (filtrosSeleccionados.tipos.length > 0) {
-                recetasFiltradas = recetasFiltradas.filter(r => 
-                    r.tipos && r.tipos.some(t => filtrosSeleccionados.tipos.includes(t))
-                );
-            }
-            
-            if (filtrosSeleccionados.paises.length > 0) {
-                recetasFiltradas = recetasFiltradas.filter(r => 
-                    r.paises && r.paises.some(p => filtrosSeleccionados.paises.includes(p))
-                );
-            }
-            
-            const grid = document.getElementById('recetasGrid');
-            
-            if (recetasFiltradas.length === 0) {
-                grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:50px; background:white; border-radius:20px;"><i class="fas fa-book-open fa-3x"></i><p>✨ No hay recetas que coincidan con los filtros ✨</p></div>';
-                document.getElementById('estadisticas').innerHTML = `<i class="fas fa-chart-bar"></i> Total: ${recetas.length} recetas | Mostrando: 0`;
-                return;
-            }
-            
-            grid.innerHTML = '';
-            recetasFiltradas.forEach(receta => {
-                const primerTipo = receta.tipos && receta.tipos.length > 0 ? receta.tipos[0] : null;
-                const colorFondo = primerTipo ? getColorPorTipo(primerTipo) : '#667eea';
-                const colorTexto = primerTipo ? getTextoColorPorTipo(primerTipo) : '#ffffff';
-                const tarjeta = document.createElement('div');
-                tarjeta.className = 'tarjeta';
-                tarjeta.style.background = colorFondo;
-                tarjeta.style.color = colorTexto;
-                
-                let descripcionPreview = receta.descripcion ? receta.descripcion.replace(/<[^>]*>/g, '').substring(0, 100) : 'Sin descripción';
-                
-                const tiposHtml = (receta.tipos || []).map(t => {
-                    const tipo = categorias.tipos.find(ct => ct.nombre === t);
-                    return `<span class="badge-categoria" style="background:rgba(255,255,255,0.3);"><i class="fas fa-tag"></i> ${t}</span>`;
-                }).join('');
-                
-                const paisesHtml = (receta.paises || []).map(p => {
-                    return `<span class="badge-categoria" style="background:rgba(255,255,255,0.3);"><i class="fas fa-flag"></i> ${getBanderaPorPais(p)} ${p}</span>`;
-                }).join('');
-                
-                tarjeta.innerHTML = `
-                    <img class="tarjeta-imagen" src="${receta.imagen || 'https://us.123rf.com/450wm/arporn/arporn1504/arporn150400160/38743402-vector-de-la-cara-triste-dibujar-en-la-placa-blanca-con-la-cuchara-y-el-tenedor-sobre-fondo-azul.jpg?ver=6'}" 
-                         onerror="this.src=''">
-                    <div class="tarjeta-contenido">
-                        <div class="tarjeta-titulo">
-                            <i class="fas fa-utensil-spoon"></i> ${receta.nombre}
-                        </div>
-                        <div class="categorias-marcadores">
-                            ${tiposHtml}
-                            ${paisesHtml}
-                        </div>
-                        <div class="tarjeta-descripcion">${descripcionPreview}</div>
-                        <button class="btn-accion" onclick="verReceta(${receta.id})" style="background:rgba(255,255,255,0.2); color:inherit;"><i class="fas fa-eye"></i> Ver detalles</button>
-                        <button class="btn-accion" onclick="editarReceta(${receta.id})" style="background:rgba(255,255,255,0.2); color:inherit;"><i class="fas fa-edit"></i> Editar todo</button>
-                        <button class="btn-accion" onclick="eliminarReceta(${receta.id})" style="background:rgba(255,0,0,0.3); color:inherit;"><i class="fas fa-trash"></i> Eliminar</button>
-                    </div>
-                `;
-                grid.appendChild(tarjeta);
-            });
-            
-            document.getElementById('estadisticas').innerHTML = `<i class="fas fa-chart-bar"></i> Total: ${recetas.length} recetas | Mostrando: ${recetasFiltradas.length}`;
-        }
-
+        
+        function eliminarFiltroTipo(tipo) { filtrosSeleccionados.tipos = filtrosSeleccionados.tipos.filter(t => t !== tipo); actualizarFiltrosActivosUI(); actualizarModalFiltros(); renderizarPestanas(); }
+        function eliminarFiltroPais(pais) { filtrosSeleccionados.paises = filtrosSeleccionados.paises.filter(p => p !== pais); actualizarFiltrosActivosUI(); actualizarModalFiltros(); renderizarPestanas(); }
+        
         function verReceta(id) {
             const receta = recetas.find(r => r.id === id);
-            if (!receta) return;
-            
+            if(!receta) return;
             document.getElementById('modalTitulo').innerHTML = receta.nombre;
             document.getElementById('modalImagen').src = receta.imagen || 'https://via.placeholder.com/500x300?text=🍳+Sin+imagen';
             document.getElementById('modalDescripcion').innerHTML = receta.descripcion || '<p>Sin descripción</p>';
             document.getElementById('modalEnlace').href = receta.video || '#';
             document.getElementById('modalEnlace').style.display = receta.video ? 'inline-flex' : 'none';
-            
-            const modalTipos = document.getElementById('modalTipos');
-            const modalPaises = document.getElementById('modalPaises');
-            
-            modalTipos.innerHTML = (receta.tipos || []).map(t => {
-                const tipo = categorias.tipos.find(ct => ct.nombre === t);
-                return `<span style="background:${tipo.color}; color:${tipo.textoColor}; padding:4px 12px; border-radius:20px; margin:5px; display:inline-block;"><i class="fas fa-tag"></i> ${t}</span>`;
-            }).join('') || '<span style="color:#999;">Sin tipos</span>';
-            
-            modalPaises.innerHTML = (receta.paises || []).map(p => {
-                const pais = categorias.paises.find(cp => cp.nombre === p);
-                return `<span style="background:${pais.color}; color:${pais.textoColor}; padding:4px 12px; border-radius:20px; margin:5px; display:inline-block;"><i class="fas fa-flag"></i> ${pais.bandera} ${p}</span>`;
-            }).join('') || '<span style="color:#999;">Sin países</span>';
-            
+            document.getElementById('modalTipos').innerHTML = (receta.tipos || []).map(t => { const tipo = categorias.tipos.find(ct => ct.nombre === t); return `<span style="background:${tipo.color}; color:${tipo.textoColor}; padding:4px 12px; border-radius:20px; margin:5px; display:inline-block;"><i class="fas fa-tag"></i> ${t}</span>`; }).join('') || '<span style="color:#999;">Sin tipos</span>';
+            document.getElementById('modalPaises').innerHTML = (receta.paises || []).map(p => { const pais = categorias.paises.find(cp => cp.nombre === p); return `<span style="background:${pais.color}; color:${pais.textoColor}; padding:4px 12px; border-radius:20px; margin:5px; display:inline-block;"><i class="fas fa-flag"></i> ${pais.bandera} ${p}</span>`; }).join('') || '<span style="color:#999;">Sin países</span>';
             recetaEditando = receta;
             document.getElementById('modal').style.display = 'flex';
         }
         
-        function editarRecetaDesdeModal() {
-            if (recetaEditando) {
-                cerrarModal();
-                editarReceta(recetaEditando.id);
-            }
-        }
-        
-        function eliminarReceta(id) {
-            if (confirm('¿Eliminar esta receta?')) {
-                recetas = recetas.filter(r => r.id !== id);
-                guardarDatos();
-                mostrarRecetas();
-            }
-        }
-        
-        function eliminarTodas() {
-            if (confirm('⚠️ ¿Eliminar TODAS las recetas?')) {
-                recetas = [];
-                guardarDatos();
-                mostrarRecetas();
-            }
-        }
+        function editarRecetaDesdeModal() { if(recetaEditando) { cerrarModal(); editarReceta(recetaEditando.id); } }
+        function eliminarReceta(id) { if(confirm('¿Eliminar esta receta?')) { recetas = recetas.filter(r => r.id !== id); guardarDatos(); renderizarPestanas(); } }
+        function eliminarTodas() { if(confirm('⚠️ ¿Eliminar TODAS las recetas?')) { recetas = []; guardarDatos(); renderizarPestanas(); } }
         
         function exportarRecetario() {
-            const datosCompletos = { 
-                recetas: recetas, 
-                categorias: categorias, 
-                coloresSeparador: coloresSeparador, 
-                version: '5.2',
-                fechaExportacion: new Date().toISOString()
-            };
-            const blob = new Blob([JSON.stringify(datosCompletos, null, 2)], {type: 'application/json'});
+            const blob = new Blob([JSON.stringify({ recetas, categorias, coloresSeparador, version: '5.2', fechaExportacion: new Date().toISOString() }, null, 2)], {type: 'application/json'});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `recetario_multicat_${new Date().toISOString().split('T')[0]}.json`;
+            a.download = `recetario_${new Date().toISOString().split('T')[0]}.json`;
             a.click();
             URL.revokeObjectURL(url);
-            alert('✅ Recetario exportado');
+            alert('✅ Exportado');
         }
         
         function importarRecetario() {
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = '.json';
-            input.onchange = function(e) {
+            input.onchange = e => {
                 const file = e.target.files[0];
                 const reader = new FileReader();
-                reader.onload = function(evt) {
+                reader.onload = evt => {
                     try {
                         const datos = JSON.parse(evt.target.result);
-                        if (datos.recetas) {
+                        if(datos.recetas) {
                             recetas = datos.recetas;
-                            if (datos.categorias) {
-                                datos.categorias.tipos.forEach(tipo => {
-                                    if (!tipo.textoColor) tipo.textoColor = '#ffffff';
-                                });
-                                datos.categorias.paises.forEach(pais => {
-                                    if (!pais.textoColor) pais.textoColor = '#ffffff';
-                                });
+                            if(datos.categorias) {
+                                datos.categorias.tipos.forEach(t => { if(!t.textoColor) t.textoColor = '#ffffff'; });
+                                datos.categorias.paises.forEach(p => { if(!p.textoColor) p.textoColor = '#ffffff'; });
                                 categorias = datos.categorias;
                             }
-                            if (datos.coloresSeparador) coloresSeparador = datos.coloresSeparador;
+                            if(datos.coloresSeparador) coloresSeparador = datos.coloresSeparador;
                             guardarDatos();
                             actualizarSelectores();
                             actualizarMultiSelectores();
                             actualizarModalFiltros();
                             actualizarFiltrosActivosUI();
-                            mostrarRecetas();
+                            renderizarPestanas();
                             alert(`✅ Importadas ${recetas.length} recetas`);
-                        } else {
-                            alert('Formato inválido');
-                        }
-                    } catch (error) {
-                        alert('Error al leer el archivo');
-                    }
+                        } else alert('Formato inválido');
+                    } catch(error) { alert('Error al leer'); }
                 };
                 reader.readAsText(file);
             };
             input.click();
         }
         
-        function cerrarModal() {
-            document.getElementById('modal').style.display = 'none';
-            recetaEditando = null;
-        }
+        function cerrarModal() { document.getElementById('modal').style.display = 'none'; recetaEditando = null; }
         
         cargarDatos();
     </script>
